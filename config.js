@@ -9,6 +9,16 @@ const AKTIER = [
   { navn: "Verizon Communications", ticker: "VZ",   antal: 9,  gak: 42.44 },
 ];
 
+// ─────────────────────────────────────────────────────────────
+//  KØB OG SALG. Én linje pr. handel. De vises som cirkler på graferne
+//  (K = køb, S = salg). dato skrives som ÅÅÅÅ-MM-DD, kurs i USD.
+//  AKTIER-listen ovenfor skal stadig vise, hvad du ejer LIGE NU.
+//  Eksempel:
+//  { dato: "2026-10-01", ticker: "VZ", type: "køb", antal: 9, kurs: 42.44 },
+// ─────────────────────────────────────────────────────────────
+const HANDLER = [
+];
+
 // Din gratis Finnhub-nøgle (https://finnhub.io → "Get free API key").
 // Indsæt den mellem anførselstegnene. Står den tom, spørger appen
 // efter nøglen og gemmer den kun på den telefon, du taster den ind på.
