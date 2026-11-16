@@ -189,7 +189,7 @@ a.stock:active{transform:scale(.985)}
   // handler fra config.js → tid i sekunder + fortegn (køb +, salg −)
   const TX = (typeof HANDLER !== "undefined" && Array.isArray(HANDLER) ? HANDLER : []).map(h => {
     const d = String(h.dato || "").trim();
-    const ms = /^\d{4}-\d{2}-\d{2}$/.test(d) ? Date.parse(d + "T16:00:00Z") : Date.parse(d.replace(" ", "T"));
+    const ms = /^\d{4}-\d{2}-\d{2}$/.test(d) ? Date.parse(d + "T00:00:00Z") : Date.parse(d.replace(" ", "T"));
     const salg = /^s/i.test(String(h.type || ""));
     return { ticker: h.ticker, navn: h.navn || h.ticker, antal: +h.antal || 0, kurs: +h.kurs || 0, salg, t: ms / 1000 };
   }).filter(x => x.ticker && isFinite(x.t)).sort((a, b) => a.t - b.t);
@@ -325,7 +325,14 @@ a.stock:active{transform:scale(.985)}
     if (t.length < 2) return null;
     let base = v[0];
     if (r.id === "1D") base = ss.reduce((b, x) => b + qtyAt(x.a, t[0]) * x.s.base, 0) * state.fx;
-    return { t, v, base };
+    // ændring uden indskud: køb og salg i perioden trækkes fra, så kun kursudviklingen tæller
+    const chg = i => {
+      let net = 0, ind = 0;
+      for (const x of TX) if (x.t > t[0] && x.t <= t[i]) { const b = x.antal * x.kurs * state.fx; if (x.salg) net -= b; else { net += b; ind += b; } }
+      const d = v[i] - base - net, grund = base + ind;
+      return { d, p: grund ? d / grund * 100 : 0 };
+    };
+    return { t, v, base, chg };
   }
   function marksFor(a, s, r) {
     const out = [], t0 = s.t[0] - r.bar, t1 = s.t[s.t.length - 1] + r.bar;
@@ -461,10 +468,10 @@ a.stock:active{transform:scale(.985)}
     const live = a ? c.rows.find(x => x.a === a).q.c : c.value;
     const s = a ? stockSeries(a.ticker, r) : portfolioSeries(r);
 
-    const readout = (val, base, when) => {
+    const readout = (val, i, when) => {
       $("roVal").innerHTML = fmtVal(val);
-      if (base == null) { $("roChg").innerHTML = ""; return; }
-      const d = val - base, p = base ? d / base * 100 : 0;
+      if (i == null) { $("roChg").innerHTML = ""; return; }
+      const { d, p } = s.chg ? s.chg(i) : { d: val - s.base, p: s.base ? (val - s.base) / s.base * 100 : 0 };
       $("roChg").innerHTML = `<span class="${cls(d)}">${fmtChg(d)} (${pct(p)})</span><span class="when">${esc(when)}</span>`;
     };
 
@@ -475,7 +482,7 @@ a.stock:active{transform:scale(.985)}
       return;
     }
     const n = s.v.length, last = s.v[n - 1];
-    readout(last, s.base, r.txt);
+    readout(last, n - 1, r.txt);
 
     const W = Math.max(box.clientWidth, 200), H = 190, pt = 14, pb = 8;
     const marks = marksFor(a, s, r);
@@ -490,7 +497,7 @@ a.stock:active{transform:scale(.985)}
     const pad = (hi - lo) * 0.08; lo -= pad; hi += pad;
     const span = r.slots && n <= r.slots ? r.slots - 1 : n - 1;   // 1D: aksen dækker hele handelsdagen
     const X = i => i / span * W, Y = v => pt + (1 - (v - lo) / (hi - lo)) * (H - pt - pb);
-    const up = last >= s.base, col = up ? "var(--up)" : "var(--down)";
+    const up = (s.chg ? s.chg(n - 1).d : last - s.base) >= 0, col = up ? "var(--up)" : "var(--down)";
     let line = "";
     for (let i = 0; i < n; i++) line += (i ? "L" : "M") + X(i).toFixed(1) + "," + Y(s.v[i]).toFixed(1);
     const area = `${line}L${X(n - 1).toFixed(1)},${H}L0,${H}Z`;
@@ -553,9 +560,9 @@ a.stock:active{transform:scale(.985)}
       const when = intraday
         ? d.toLocaleDateString("da-DK", { weekday: "short", day: "numeric", month: "short" }) + " kl. " + d.toLocaleTimeString("da-DK", { hour: "2-digit", minute: "2-digit" })
         : d.toLocaleDateString("da-DK", { day: "numeric", month: "short", year: "numeric" });
-      readout(s.v[i], s.base, when);
+      readout(s.v[i], i, when);
     };
-    const end = () => { if (!scrubbing) return; scrubbing = false; g.setAttribute("visibility", "hidden"); readout(last, s.base, r.txt); };
+    const end = () => { if (!scrubbing) return; scrubbing = false; g.setAttribute("visibility", "hidden"); readout(last, n - 1, r.txt); };
     svg.addEventListener("pointerdown", at);
     svg.addEventListener("pointermove", e => { if (e.pointerType === "mouse" || e.buttons || e.pressure > 0) at(e); });
     ["pointerup", "pointerleave", "pointercancel"].forEach(ev => svg.addEventListener(ev, end));
