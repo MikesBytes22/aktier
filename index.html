@@ -191,8 +191,10 @@ a.stock:active{transform:scale(.985)}
     const d = String(h.dato || "").trim();
     const ms = /^\d{4}-\d{2}-\d{2}$/.test(d) ? Date.parse(d + "T16:00:00Z") : Date.parse(d.replace(" ", "T"));
     const salg = /^s/i.test(String(h.type || ""));
-    return { ticker: h.ticker, antal: +h.antal || 0, kurs: +h.kurs || 0, salg, t: ms / 1000 };
+    return { ticker: h.ticker, navn: h.navn || h.ticker, antal: +h.antal || 0, kurs: +h.kurs || 0, salg, t: ms / 1000 };
   }).filter(x => x.ticker && isFinite(x.t)).sort((a, b) => a.t - b.t);
+  // aktier du ejer nu + aktier du har solgt helt (de tæller med i kurven for den tid, du ejede dem)
+  const ALLE = AKTIER.concat([...new Set(TX.map(x => x.ticker))].filter(t => !AKTIER.some(a => a.ticker === t)).map(t => ({ ticker: t, antal: 0, gak: 0 })));
 
   /* ---------- formatering ---------- */
   const nf = (d) => new Intl.NumberFormat("da-DK", { minimumFractionDigits: d, maximumFractionDigits: d });
@@ -231,7 +233,7 @@ a.stock:active{transform:scale(.985)}
   async function loadHist(force) {
     if (!force && Date.now() - histAt < HIST_EVERY) return;
     histAt = Date.now();
-    await Promise.all(AKTIER.map(async a => {
+    await Promise.all(ALLE.map(async a => {
       try { const j = await getJSON(`${HIST_URL}${encodeURIComponent(a.ticker)}.json?t=${histAt}`); if (j && j.serier) hist[a.ticker] = j; } catch {}
     }));
     histDone = true;
@@ -304,20 +306,21 @@ a.stock:active{transform:scale(.985)}
   // samlet værdi i kr over tid (omregnet med dagens valutakurs)
   function portfolioSeries(r) {
     if (!state) return null;
-    const ss = AKTIER.map(a => ({ a, s: stockSeries(a.ticker, r) }));
+    const ss = ALLE.map(a => ({ a, s: stockSeries(a.ticker, r) }));
     if (ss.some(x => !x.s)) return null;
     const times = [...new Set(ss.flatMap(x => x.s.t))].sort((a, b) => a - b);
     const idx = ss.map(() => -1), t = [], v = [];
     for (const tm of times) {
-      let sum = 0, ok = true;
+      let sum = 0, ok = true, held = false;
       ss.forEach((x, k) => {
         while (idx[k] + 1 < x.s.t.length && x.s.t[idx[k] + 1] <= tm) idx[k]++;
         const q = qtyAt(x.a, tm);
         if (!q) return;
+        held = true;
         if (idx[k] < 0) { ok = false; return; }
         sum += q * x.s.v[idx[k]];
       });
-      if (ok) { t.push(tm); v.push(sum * state.fx); }
+      if (ok && held) { t.push(tm); v.push(sum * state.fx); }   // kurven starter ved dit første køb
     }
     if (t.length < 2) return null;
     let base = v[0];
@@ -355,6 +358,8 @@ a.stock:active{transform:scale(.985)}
   const segHTML = () => `<div class="seg" role="group" aria-label="Periode">${RANGES.map(r =>
     `<button type="button" data-range="${r.id}" aria-pressed="${r.id === curRange().id}">${r.id}</button>`).join("")}</div>`;
   const chartBlock = () => `<div class="chart" id="chart"></div><div class="xl num" id="xl"></div>${segHTML()}<div class="legend" id="legend"></div>`;
+
+  const txList = (list, medNavn) => `<div class="tx">${list.map(x => `<div><span><b>${x.salg ? "Salg" : "Køb"}</b>${medNavn ? " · " + esc(x.navn) : ""} · ${new Date(x.t * 1000).toLocaleDateString("da-DK", medNavn ? { day: "numeric", month: "short" } : { day: "numeric", month: "short", year: "numeric" })}</span><span class="num">${n0.format(x.antal)} stk à ${usd(x.kurs)}</span></div>`).join("")}</div>`;
 
   function homeHTML(c) {
     const cards = c.rows.map(({ a, q, val, ret, retPct }) => {
@@ -394,14 +399,15 @@ a.stock:active{transform:scale(.985)}
             <div class="v num ${cls(c.dayKr)}">${skr(c.dayKr)}</div>
             <div class="s num ${cls(c.dayKr)}">${pct(c.dayPct)}</div></div>
         </div>
-      </section>${cards}`;
+      </section>${cards}${TX.length ? `
+      <section class="card"><div class="lbl">Køb og salg</div>${txList(TX.slice().reverse(), true)}</section>` : ""}`;
   }
 
   function stockHTML(c, a) {
     const { q, val, ret, retPct } = c.rows.find(r => r.a === a);
     const tx = TX.filter(x => x.ticker === a.ticker).slice().reverse();
     const txHTML = tx.length
-      ? `<div class="tx">${tx.map(x => `<div><span><b>${x.salg ? "Salg" : "Køb"}</b> · ${new Date(x.t * 1000).toLocaleDateString("da-DK", { day: "numeric", month: "short", year: "numeric" })}</span><span class="num">${n0.format(x.antal)} stk à ${usd(x.kurs)}</span></div>`).join("")}</div>`
+      ? txList(tx, false)
       : `<p class="hint">Ingen handler lagt ind endnu. Når købsdatoen er lagt ind, vises købet som en cirkel på grafen.</p>`;
     return `
       <section class="card">
