@@ -497,7 +497,8 @@ a.stock:active{transform:scale(.985)}
     const pad = (hi - lo) * 0.08; lo -= pad; hi += pad;
     const span = r.slots && n <= r.slots ? r.slots - 1 : n - 1;   // 1D: aksen dækker hele handelsdagen
     const X = i => i / span * W, Y = v => pt + (1 - (v - lo) / (hi - lo)) * (H - pt - pb);
-    const up = (s.chg ? s.chg(n - 1).d : last - s.base) >= 0, col = up ? "var(--up)" : "var(--down)";
+    // Farven følger dit afkast: grøn når kursen ligger over din GAK (forsiden: samlet afkast i plus)
+    const up = a ? last >= a.gak : c.ret >= 0, col = up ? "var(--up)" : "var(--down)";
     let line = "";
     for (let i = 0; i < n; i++) line += (i ? "L" : "M") + X(i).toFixed(1) + "," + Y(s.v[i]).toFixed(1);
     const area = `${line}L${X(n - 1).toFixed(1)},${H}L0,${H}Z`;
