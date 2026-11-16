@@ -37,8 +37,10 @@ body{font:16px/1.45 var(--display);min-height:100vh;min-height:100dvh}
 .app{max-width:560px;margin:0 auto;
   padding:calc(env(safe-area-inset-top,0px) + 14px) max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 24px) max(16px,env(safe-area-inset-left,0px))}
 .num{font-family:var(--round);font-variant-numeric:tabular-nums}
-header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px;min-height:42px}
 h1{font-size:30px;font-weight:700;margin:0;line-height:1.1}
+.back{color:var(--accent);font-weight:600;font-size:17px;text-decoration:none;padding:8px 8px 8px 0;display:inline-flex;align-items:center;gap:2px}
+.back svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
 .btn{border:0;border-radius:99px;padding:10px 16px;font:600 15px var(--display);background:var(--accent);color:var(--accent-ink);
   display:inline-flex;align-items:center;gap:7px;cursor:pointer;touch-action:manipulation;transition:transform .12s ease,opacity .15s ease}
 .btn:active{transform:scale(.95)}
@@ -46,36 +48,66 @@ h1{font-size:30px;font-weight:700;margin:0;line-height:1.1}
 .btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 .btn.busy svg{animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.btn:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn:focus-visible,input:focus-visible,a:focus-visible,.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
 .stack{display:flex;flex-direction:column;gap:12px}
 .lbl{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
 
-/* hero */
-.hero .big{font-size:46px;font-weight:700;line-height:1.05;margin-top:2px;white-space:nowrap}
-.hero .big small{font-size:22px;font-weight:600;color:var(--fg-2);margin-left:4px}
-.hero .two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+/* overskrift over grafen: stort tal + ændring i den valgte periode */
+.big{font-size:44px;font-weight:700;line-height:1.05;margin-top:2px;white-space:nowrap}
+.big small{font-size:21px;font-weight:600;color:var(--fg-2);margin-left:4px}
+.chg{font-size:15.5px;font-weight:600;margin-top:4px;min-height:22px}
+.chg .when{color:var(--muted);font-weight:500;margin-left:6px}
+
+/* graf */
+.chart{margin:12px -4px 0;height:190px;position:relative;touch-action:pan-y;-webkit-user-select:none;user-select:none}
+.chart svg{display:block;width:100%;height:100%;overflow:visible}
+.chart .ax{font:11px var(--display);fill:var(--muted)}
+.chart .mk{font:700 10px var(--display)}
+.nochart{height:100%;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:14px;text-align:center;padding:0 20px}
+.xl{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-top:4px;min-height:17px}
+.seg{display:flex;background:var(--surface-2);border-radius:11px;padding:3px;gap:2px;margin-top:10px}
+.seg button{flex:1;min-width:0;border:0;background:none;color:var(--fg-2);padding:7px 0;border-radius:8px;font:600 13.5px var(--display);cursor:pointer;touch-action:manipulation}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--fg);box-shadow:0 1px 2px rgba(0,0,0,.14)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--fg-2);margin-top:10px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{display:inline-block}
+.legend .k,.legend .s{width:16px;height:16px;border-radius:50%;font:700 10px/16px var(--display);text-align:center;font-style:normal}
+.legend .k{background:var(--accent);color:var(--accent-ink)}
+.legend .s{box-shadow:inset 0 0 0 2px var(--accent);color:var(--accent)}
+.legend .dash{width:18px;border-top:2px dashed var(--muted)}
+.legend .dash.g{border-color:var(--accent)}
+
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
 .box{background:var(--surface-2);border-radius:12px;padding:10px 12px;min-width:0}
 .box .v{font-size:19px;font-weight:700;line-height:1.2;margin-top:2px;white-space:nowrap}
 .box .s{font-size:13.5px;font-weight:600}
 
 /* aktiekort */
+a.stock{display:block;color:inherit;text-decoration:none;transition:transform .12s ease}
+a.stock:active{transform:scale(.985)}
 .stock .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
-.stock .name{font-size:17px;font-weight:600;line-height:1.2}
-.stock .tick{font-size:12.5px;color:var(--muted);font-weight:600;letter-spacing:.04em;margin-top:2px}
+.name{font-size:17px;font-weight:600;line-height:1.2}
+.tick{font-size:12.5px;color:var(--muted);font-weight:600;letter-spacing:.04em;margin-top:2px}
 .stock .price{text-align:right;font-size:17px;font-weight:600;white-space:nowrap}
-.stock .price span{display:block;font-size:12.5px;color:var(--muted);font-weight:500}
+.stock .price span{display:block;font-size:12.5px;color:var(--accent);font-weight:600}
 .today{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:12px 0 2px}
 .today .pct{font-size:42px;font-weight:700;line-height:1}
 .today .usd{font-size:17px;font-weight:600}
 .today .tag{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;margin-left:auto}
 .meter{height:6px;border-radius:4px;background:var(--surface-2);overflow:hidden;margin:10px 0 12px;position:relative}
 .meter i{position:absolute;top:0;bottom:0;border-radius:4px}
-.kv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;border-top:1px solid var(--line);padding-top:12px}
+.kv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 8px}
+.stock .kv{border-top:1px solid var(--line);padding-top:12px}
 .kv .k{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
 .kv .v{font-size:15.5px;font-weight:600;white-space:nowrap}
 .kv .s{font-size:12.5px;font-weight:600}
+.tx{display:flex;flex-direction:column;margin-top:6px}
+.tx div{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:14.5px}
+.tx div:first-child{border-top:0}
+.tx b{font-weight:600}
+.hint{font-size:14px;color:var(--fg-2);margin:6px 0 0}
 .up{color:var(--up)} .down{color:var(--down)} .flat{color:var(--fg-2)}
 .bg-up{background:var(--up)} .bg-down{background:var(--down)}
 
@@ -88,7 +120,7 @@ h1{font-size:30px;font-weight:700;margin:0;line-height:1.1}
 .setup input{flex:1;min-width:0;border:1px solid var(--line);background:var(--surface-2);color:var(--fg);border-radius:12px;padding:10px 12px;font:16px var(--display)}
 .setup a{color:var(--accent);font-weight:600}
 .skel{height:150px;border-radius:var(--r);background:var(--surface);border:1px solid var(--line);opacity:.6}
-.fresh{animation:pop .35s ease}
+.fresh{animation:pop .3s ease}
 @keyframes pop{from{opacity:.4;transform:translateY(4px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.fresh,.btn.busy svg{animation:none}}
 [hidden]{display:none!important}
@@ -97,7 +129,8 @@ h1{font-size:30px;font-weight:700;margin:0;line-height:1.1}
 <body>
 <div class="app">
   <header>
-    <h1>Mine aktier</h1>
+    <h1 id="title">Mine aktier</h1>
+    <a class="back" id="back" href="#" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>Mine aktier</a>
     <button class="btn" id="refresh" type="button">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 6.3"/><path d="M20 4v7h-7"/></svg>
       <span id="refreshTxt">Opdater</span>
@@ -110,7 +143,7 @@ h1{font-size:30px;font-weight:700;margin:0;line-height:1.1}
     <div class="lbl">Mangler API-nøgle</div>
     <p>Opret en gratis nøgle på <a href="https://finnhub.io/register" target="_blank" rel="noopener">finnhub.io</a> og indsæt den her. Den gemmes kun på denne enhed.</p>
     <form id="keyForm">
-      <input id="keyInput" type="text" inputmode="latin" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Finnhub API-nøgle" aria-label="Finnhub API-nøgle">
+      <input id="keyInput" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Finnhub API-nøgle" aria-label="Finnhub API-nøgle">
       <button class="btn" type="submit">Gem</button>
     </form>
   </section>
@@ -124,9 +157,21 @@ h1{font-size:30px;font-weight:700;margin:0;line-height:1.1}
 <script>
 (() => {
   "use strict";
-  const CACHE = "aktier.cache.v1", KEYSTORE = "aktier.finnhubKey";
+  const CACHE = "aktier.cache.v1", KEYSTORE = "aktier.finnhubKey", RANGESTORE = "aktier.range";
+  const HIST_URL = "https://raw.githubusercontent.com/MikesBytes22/aktier/data/";   // fyldes automatisk af GitHub
   const MIN_GAP = 10 * 1000;        // mindst 10 sek. mellem automatiske hentninger
   const AUTO_EVERY = 60 * 1000;     // hent selv hvert minut, mens appen er fremme
+  const HIST_EVERY = 5 * 60 * 1000; // historikken hentes højst hvert 5. minut
+  // tidsvalg: s = hvilken serie i historik-filen, bar = sekunder pr. punkt
+  const RANGES = [
+    { id: "1D",   s: "d1",  bar: 300,    txt: "i dag", slots: 79 },
+    { id: "1U",   s: "d5",  bar: 900,    txt: "seneste uge" },
+    { id: "1M",   s: "m1",  bar: 3600,   txt: "seneste måned" },
+    { id: "3M",   s: "y5",  bar: 86400,  txt: "seneste 3 mdr.", days: 92 },
+    { id: "1Å",   s: "y5",  bar: 86400,  txt: "seneste år", days: 366 },
+    { id: "5Å",   s: "y5",  bar: 86400,  txt: "seneste 5 år" },
+    { id: "Maks", s: "max", bar: 604800, txt: "hele perioden" },
+  ];
   const $ = id => document.getElementById(id);
   const store = {
     get(k){ try { return localStorage.getItem(k); } catch { return null; } },
@@ -134,10 +179,20 @@ h1{font-size:30px;font-weight:700;margin:0;line-height:1.1}
   };
 
   let state = null;                 // { quotes:{T:{c,d,dp,pc,t}}, fx, at }
-  let busy = false, lastTry = 0;
+  let hist = {}, histAt = 0, histDone = false;
+  let busy = false, lastTry = 0, scrubbing = false, homeScroll = 0;
+  let range = store.get(RANGESTORE) || "1D";
   try { state = JSON.parse(store.get(CACHE)); } catch {}
 
   const key = () => (typeof FINNHUB_KEY === "string" && FINNHUB_KEY.trim()) || (store.get(KEYSTORE) || "").trim();
+
+  // handler fra config.js → tid i sekunder + fortegn (køb +, salg −)
+  const TX = (typeof HANDLER !== "undefined" && Array.isArray(HANDLER) ? HANDLER : []).map(h => {
+    const d = String(h.dato || "").trim();
+    const ms = /^\d{4}-\d{2}-\d{2}$/.test(d) ? Date.parse(d + "T16:00:00Z") : Date.parse(d.replace(" ", "T"));
+    const salg = /^s/i.test(String(h.type || ""));
+    return { ticker: h.ticker, antal: +h.antal || 0, kurs: +h.kurs || 0, salg, t: ms / 1000 };
+  }).filter(x => x.ticker && isFinite(x.t)).sort((a, b) => a.t - b.t);
 
   /* ---------- formatering ---------- */
   const nf = (d) => new Intl.NumberFormat("da-DK", { minimumFractionDigits: d, maximumFractionDigits: d });
@@ -150,6 +205,8 @@ h1{font-size:30px;font-weight:700;margin:0;line-height:1.1}
   const susd = v => sign(v) + n2.format(Math.abs(v)) + " USD";
   const cls = v => v > 0.0001 ? "up" : v < -0.0001 ? "down" : "flat";
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
+  const view = () => { const h = decodeURIComponent(location.hash.slice(1)); return AKTIER.find(a => a.ticker === h) || null; };
+  const curRange = () => RANGES.find(r => r.id === range) || RANGES[0];
 
   /* ---------- hent data ---------- */
   async function getJSON(url) {
@@ -171,6 +228,15 @@ h1{font-size:30px;font-weight:700;margin:0;line-height:1.1}
     if (j && j.rates && j.rates.DKK) return j.rates.DKK;
     throw new Error("Kunne ikke hente valutakursen USD/DKK.");
   }
+  async function loadHist(force) {
+    if (!force && Date.now() - histAt < HIST_EVERY) return;
+    histAt = Date.now();
+    await Promise.all(AKTIER.map(async a => {
+      try { const j = await getJSON(`${HIST_URL}${encodeURIComponent(a.ticker)}.json?t=${histAt}`); if (j && j.serier) hist[a.ticker] = j; } catch {}
+    }));
+    histDone = true;
+    render();
+  }
 
   async function refresh(manual) {
     if (busy) return;
@@ -180,6 +246,7 @@ h1{font-size:30px;font-weight:700;margin:0;line-height:1.1}
     if (!manual && Date.now() - lastTry < MIN_GAP) return;
     busy = true; lastTry = Date.now();
     setBusy(true);
+    loadHist(manual);
     try {
       const [fx, ...qs] = await Promise.all([getFx(), ...AKTIER.map(a => getQuote(a.ticker, k))]);
       const quotes = {};
@@ -187,7 +254,7 @@ h1{font-size:30px;font-weight:700;margin:0;line-height:1.1}
       state = { quotes, fx, at: Date.now() };
       store.set(CACHE, JSON.stringify(state));
       showErr("");
-      render(true);
+      render(manual);
     } catch (e) {
       let msg = e.message;
       if (e.status === 401 || e.status === 403) msg = "Finnhub afviste API-nøglen. Tjek at den er indsat rigtigt.";
@@ -208,56 +275,101 @@ h1{font-size:30px;font-weight:700;margin:0;line-height:1.1}
   }
   function showErr(m) { $("err").textContent = m; $("err").hidden = !m; }
 
-  /* ---------- tegn siden ---------- */
-  function render(fresh) {
-    const main = $("main");
-    const have = state && state.fx && AKTIER.every(a => state.quotes && state.quotes[a.ticker]);
-    if (!have) {
-      main.innerHTML = key() ? '<div class="skel"></div><div class="skel"></div>' : "";
-      $("stamp").textContent = "";
-      return;
+  /* ---------- serier til graferne ---------- */
+  // kurs over tid for én aktie i den valgte periode; den nyeste live-kurs sættes på som sidste punkt
+  function stockSeries(ticker, r) {
+    const h = hist[ticker], s = h && h.serier && h.serier[r.s];
+    if (!s || !s.t || !s.t.length) return null;
+    let t = s.t.slice(), v = s.c.slice();
+    const q = state && state.quotes && state.quotes[ticker];
+    if (q && q.t) {
+      const last = t[t.length - 1];
+      if (q.t - last >= r.bar) { t.push(q.t); v.push(q.c); }
+      else if (q.t >= last) v[v.length - 1] = q.c;
     }
+    if (r.days) {
+      const cut = Date.now() / 1000 - r.days * 86400;
+      let i = t.findIndex(x => x >= cut); if (i < 0) i = 0;
+      t = t.slice(i); v = v.slice(i);
+    }
+    const base = r.id === "1D" ? ((q && q.pc) || s.prev || v[0]) : v[0];
+    return { t, v, base };
+  }
+  // hvor mange stk. du ejede på et tidspunkt: dagens antal minus de handler, der ligger senere
+  function qtyAt(a, tSec) {
+    let q = a.antal;
+    for (const x of TX) if (x.ticker === a.ticker && x.t > tSec) q -= (x.salg ? -1 : 1) * x.antal;
+    return Math.max(q, 0);
+  }
+  // samlet værdi i kr over tid (omregnet med dagens valutakurs)
+  function portfolioSeries(r) {
+    if (!state) return null;
+    const ss = AKTIER.map(a => ({ a, s: stockSeries(a.ticker, r) }));
+    if (ss.some(x => !x.s)) return null;
+    const times = [...new Set(ss.flatMap(x => x.s.t))].sort((a, b) => a - b);
+    const idx = ss.map(() => -1), t = [], v = [];
+    for (const tm of times) {
+      let sum = 0, ok = true;
+      ss.forEach((x, k) => {
+        while (idx[k] + 1 < x.s.t.length && x.s.t[idx[k] + 1] <= tm) idx[k]++;
+        const q = qtyAt(x.a, tm);
+        if (!q) return;
+        if (idx[k] < 0) { ok = false; return; }
+        sum += q * x.s.v[idx[k]];
+      });
+      if (ok) { t.push(tm); v.push(sum * state.fx); }
+    }
+    if (t.length < 2) return null;
+    let base = v[0];
+    if (r.id === "1D") base = ss.reduce((b, x) => b + qtyAt(x.a, t[0]) * x.s.base, 0) * state.fx;
+    return { t, v, base };
+  }
+  function marksFor(a, s, r) {
+    const out = [], t0 = s.t[0] - r.bar, t1 = s.t[s.t.length - 1] + r.bar;
+    for (const x of TX) {
+      if (a && x.ticker !== a.ticker) continue;
+      if (x.t < t0 || x.t > t1) continue;
+      let bi = 0, bd = Infinity;
+      for (let i = 0; i < s.t.length; i++) { const d = Math.abs(s.t[i] - x.t); if (d < bd) { bd = d; bi = i; } }
+      out.push({ i: bi, y: a ? x.kurs : s.v[bi], salg: x.salg });
+    }
+    return out;
+  }
+
+  /* ---------- beregninger ---------- */
+  function compute() {
     const fx = state.fx;
     let value = 0, cost = 0, dayUsd = 0, prevUsd = 0;
     const rows = AKTIER.map(a => {
       const q = state.quotes[a.ticker];
-      const val = a.antal * q.c * fx;
-      const ret = a.antal * (q.c - a.gak) * fx;
+      const val = a.antal * q.c * fx, ret = a.antal * (q.c - a.gak) * fx;
       value += val; cost += a.antal * a.gak * fx;
       dayUsd += a.antal * q.d; prevUsd += a.antal * q.pc;
       return { a, q, val, ret, retPct: (q.c / a.gak - 1) * 100 };
     });
-    const ret = value - cost, retPct = cost ? ret / cost * 100 : 0;
-    const dayKr = dayUsd * fx, dayPct = prevUsd ? dayUsd / prevUsd * 100 : 0;
+    const ret = value - cost;
+    return { rows, value, ret, retPct: cost ? ret / cost * 100 : 0, dayKr: dayUsd * fx, dayPct: prevUsd ? dayUsd / prevUsd * 100 : 0 };
+  }
 
-    const hero = `
-      <section class="card hero">
-        <div class="lbl">Samlet værdi</div>
-        <div class="big num">${kr(value)}<small>kr</small></div>
-        <div class="two">
-          <div class="box"><div class="lbl">Samlet afkast</div>
-            <div class="v num ${cls(ret)}">${skr(ret)}</div>
-            <div class="s num ${cls(ret)}">${pct(retPct)}</div></div>
-          <div class="box"><div class="lbl">I dag</div>
-            <div class="v num ${cls(dayKr)}">${skr(dayKr)}</div>
-            <div class="s num ${cls(dayKr)}">${pct(dayPct)}</div></div>
-        </div>
-      </section>`;
+  /* ---------- tegn siden ---------- */
+  const segHTML = () => `<div class="seg" role="group" aria-label="Periode">${RANGES.map(r =>
+    `<button type="button" data-range="${r.id}" aria-pressed="${r.id === curRange().id}">${r.id}</button>`).join("")}</div>`;
+  const chartBlock = () => `<div class="chart" id="chart"></div><div class="xl num" id="xl"></div>${segHTML()}<div class="legend" id="legend"></div>`;
 
-    const cards = rows.map(({ a, q, val, ret, retPct }) => {
-      const c = cls(q.dp);
-      // lille måler: 0 i midten, fuldt udslag ved ±5 % på dagen
-      const w = Math.min(Math.abs(q.dp) / 5, 1) * 50;
-      const bar = c === "flat" ? "" : `<i class="bg-${c}" style="${q.dp >= 0 ? "left:50%" : "right:50%"};width:${w.toFixed(1)}%"></i>`;
+  function homeHTML(c) {
+    const cards = c.rows.map(({ a, q, val, ret, retPct }) => {
+      const k = cls(q.dp);
+      const w = Math.min(Math.abs(q.dp) / 5, 1) * 50;   // måler: 0 i midten, fuldt udslag ved ±5 % på dagen
+      const bar = k === "flat" ? "" : `<i class="bg-${k}" style="${q.dp >= 0 ? "left:50%" : "right:50%"};width:${w.toFixed(1)}%"></i>`;
       return `
-      <section class="card stock">
+      <a class="card stock" href="#${encodeURIComponent(a.ticker)}">
         <div class="top">
           <div style="min-width:0"><div class="name">${esc(a.navn)}</div><div class="tick">${esc(a.ticker)} · ${n0.format(a.antal)} stk</div></div>
-          <div class="price num">${usd(q.c)}<span>kurs nu</span></div>
+          <div class="price num">${usd(q.c)}<span>Se graf ›</span></div>
         </div>
         <div class="today">
-          <div class="pct num ${c}">${pct(q.dp)}</div>
-          <div class="usd num ${c}">${susd(q.d)}</div>
+          <div class="pct num ${k}">${pct(q.dp)}</div>
+          <div class="usd num ${k}">${susd(q.d)}</div>
           <div class="tag">I dag</div>
         </div>
         <div class="meter">${bar}</div>
@@ -266,12 +378,181 @@ h1{font-size:30px;font-weight:700;margin:0;line-height:1.1}
           <div><div class="k">Afkast</div><div class="v num ${cls(ret)}">${skr(ret)}</div><div class="s num ${cls(ret)}">${pct(retPct)}</div></div>
           <div><div class="k">GAK</div><div class="v num">${n2.format(a.gak)}</div><div class="s flat">USD</div></div>
         </div>
-      </section>`;
+      </a>`;
     }).join("");
+    return `
+      <section class="card hero">
+        <div class="lbl">Samlet værdi</div>
+        <div class="big num" id="roVal"></div>
+        <div class="chg num" id="roChg"></div>
+        ${chartBlock()}
+        <div class="two">
+          <div class="box"><div class="lbl">Samlet afkast</div>
+            <div class="v num ${cls(c.ret)}">${skr(c.ret)}</div>
+            <div class="s num ${cls(c.ret)}">${pct(c.retPct)}</div></div>
+          <div class="box"><div class="lbl">I dag</div>
+            <div class="v num ${cls(c.dayKr)}">${skr(c.dayKr)}</div>
+            <div class="s num ${cls(c.dayKr)}">${pct(c.dayPct)}</div></div>
+        </div>
+      </section>${cards}`;
+  }
 
-    main.innerHTML = hero + cards;
+  function stockHTML(c, a) {
+    const { q, val, ret, retPct } = c.rows.find(r => r.a === a);
+    const tx = TX.filter(x => x.ticker === a.ticker).slice().reverse();
+    const txHTML = tx.length
+      ? `<div class="tx">${tx.map(x => `<div><span><b>${x.salg ? "Salg" : "Køb"}</b> · ${new Date(x.t * 1000).toLocaleDateString("da-DK", { day: "numeric", month: "short", year: "numeric" })}</span><span class="num">${n0.format(x.antal)} stk à ${usd(x.kurs)}</span></div>`).join("")}</div>`
+      : `<p class="hint">Ingen handler lagt ind endnu. Når købsdatoen er lagt ind, vises købet som en cirkel på grafen.</p>`;
+    return `
+      <section class="card">
+        <div class="name">${esc(a.navn)}</div>
+        <div class="tick">${esc(a.ticker)} · ${n0.format(a.antal)} stk</div>
+        <div class="big num" id="roVal" style="margin-top:10px"></div>
+        <div class="chg num" id="roChg"></div>
+        ${chartBlock()}
+      </section>
+      <section class="card">
+        <div class="kv">
+          <div><div class="k">Værdi</div><div class="v num">${kr(val)} kr</div></div>
+          <div><div class="k">Afkast</div><div class="v num ${cls(ret)}">${skr(ret)}</div><div class="s num ${cls(ret)}">${pct(retPct)}</div></div>
+          <div><div class="k">I dag</div><div class="v num ${cls(q.dp)}">${pct(q.dp)}</div><div class="s num ${cls(q.dp)}">${susd(q.d)}</div></div>
+          <div><div class="k">Antal</div><div class="v num">${n0.format(a.antal)} stk</div></div>
+          <div><div class="k">GAK</div><div class="v num">${n2.format(a.gak)}</div><div class="s flat">USD</div></div>
+          <div><div class="k">Lukkede i går</div><div class="v num">${n2.format(q.pc)}</div><div class="s flat">USD</div></div>
+        </div>
+      </section>
+      <section class="card">
+        <div class="lbl">Køb og salg</div>
+        ${txHTML}
+      </section>`;
+  }
+
+  function render(fresh) {
+    if (scrubbing) return;
+    const main = $("main"), a = view();
+    $("title").hidden = !!a; $("back").hidden = !a;
+    document.title = a ? a.navn : "Mine aktier";
+    const have = state && state.fx && AKTIER.every(x => state.quotes && state.quotes[x.ticker]);
+    if (!have) {
+      main.innerHTML = key() ? '<div class="skel"></div><div class="skel"></div>' : "";
+      $("stamp").textContent = "";
+      return;
+    }
+    const c = compute();
+    main.innerHTML = a ? stockHTML(c, a) : homeHTML(c);
+    drawChart(c, a);
     if (fresh) { main.classList.remove("fresh"); void main.offsetWidth; main.classList.add("fresh"); }
     renderStamp();
+  }
+
+  /* ---------- grafen ---------- */
+  function drawChart(c, a) {
+    const box = $("chart"); if (!box) return;
+    const r = curRange();
+    const fmtVal = a ? (v => usd(v)) : (v => `${kr(v)}<small>kr</small>`);
+    const fmtAx = a ? (v => n2.format(v)) : (v => n0.format(Math.round(v)));
+    const fmtChg = a ? (d => susd(d)) : (d => skr(d));
+    const live = a ? c.rows.find(x => x.a === a).q.c : c.value;
+    const s = a ? stockSeries(a.ticker, r) : portfolioSeries(r);
+
+    const readout = (val, base, when) => {
+      $("roVal").innerHTML = fmtVal(val);
+      if (base == null) { $("roChg").innerHTML = ""; return; }
+      const d = val - base, p = base ? d / base * 100 : 0;
+      $("roChg").innerHTML = `<span class="${cls(d)}">${fmtChg(d)} (${pct(p)})</span><span class="when">${esc(when)}</span>`;
+    };
+
+    if (!s || s.v.length < 2) {
+      box.innerHTML = `<div class="nochart">${histDone ? "Ingen kurshistorik for denne periode endnu." : "Henter kurshistorik…"}</div>`;
+      $("xl").innerHTML = ""; $("legend").innerHTML = "";
+      readout(live, null);
+      return;
+    }
+    const n = s.v.length, last = s.v[n - 1];
+    readout(last, s.base, r.txt);
+
+    const W = Math.max(box.clientWidth, 200), H = 190, pt = 14, pb = 8;
+    const marks = marksFor(a, s, r);
+    let lo = Math.min(...s.v), hi = Math.max(...s.v);
+    const showBase = r.id === "1D";
+    if (showBase) { lo = Math.min(lo, s.base); hi = Math.max(hi, s.base); }
+    for (const m of marks) { lo = Math.min(lo, m.y); hi = Math.max(hi, m.y); }
+    // GAK-linjen vises kun, når den ligger nogenlunde i nærheden – ellers trykker den kurven flad
+    let gak = null;
+    if (a) { const sp = (hi - lo) || hi * 0.01; if (a.gak > lo - sp && a.gak < hi + sp) { gak = a.gak; lo = Math.min(lo, gak); hi = Math.max(hi, gak); } }
+    if (hi === lo) { hi += 1; lo -= 1; }
+    const pad = (hi - lo) * 0.08; lo -= pad; hi += pad;
+    const span = r.slots && n <= r.slots ? r.slots - 1 : n - 1;   // 1D: aksen dækker hele handelsdagen
+    const X = i => i / span * W, Y = v => pt + (1 - (v - lo) / (hi - lo)) * (H - pt - pb);
+    const up = last >= s.base, col = up ? "var(--up)" : "var(--down)";
+    let line = "";
+    for (let i = 0; i < n; i++) line += (i ? "L" : "M") + X(i).toFixed(1) + "," + Y(s.v[i]).toFixed(1);
+    const area = `${line}L${X(n - 1).toFixed(1)},${H}L0,${H}Z`;
+    const hline = (v, stroke) => `<line x1="0" x2="${W}" y1="${Y(v).toFixed(1)}" y2="${Y(v).toFixed(1)}" style="stroke:${stroke}" stroke-width="1.5" stroke-dasharray="4 4" opacity=".75"/>`;
+    const mk = marks.map(m => {
+      const x = X(m.i).toFixed(1), y = Y(m.y).toFixed(1);
+      return m.salg
+        ? `<circle cx="${x}" cy="${y}" r="9" style="fill:var(--surface);stroke:var(--accent)" stroke-width="2.5"/><text class="mk" x="${x}" y="${y}" dy="3.5" text-anchor="middle" style="fill:var(--accent)">S</text>`
+        : `<circle cx="${x}" cy="${y}" r="9" style="fill:var(--accent);stroke:var(--surface)" stroke-width="2"/><text class="mk" x="${x}" y="${y}" dy="3.5" text-anchor="middle" style="fill:var(--accent-ink)">K</text>`;
+    }).join("");
+    box.innerHTML = `
+      <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Kursgraf, ${esc(r.txt)}">
+        <defs><linearGradient id="gr" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" style="stop-color:${col};stop-opacity:.26"/><stop offset="1" style="stop-color:${col};stop-opacity:0"/></linearGradient></defs>
+        <path d="${area}" fill="url(#gr)"/>
+        ${showBase ? hline(s.base, "var(--muted)") : ""}
+        ${gak != null ? hline(gak, "var(--accent)") : ""}
+        <path d="${line}" fill="none" style="stroke:${col}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+        <text class="ax" x="${W - 2}" y="11" text-anchor="end">${fmtAx(hi - pad)}</text>
+        <text class="ax" x="${W - 2}" y="${H - 2}" text-anchor="end">${fmtAx(lo + pad)}</text>
+        ${mk}
+        <circle cx="${X(n - 1).toFixed(1)}" cy="${Y(last).toFixed(1)}" r="4" style="fill:${col}"/>
+        <g id="scrub" visibility="hidden">
+          <line id="scL" y1="0" y2="${H}" style="stroke:var(--muted)" stroke-width="1"/>
+          <circle id="scD" r="5.5" style="fill:${col};stroke:var(--surface)" stroke-width="2.5"/>
+        </g>
+      </svg>`;
+
+    // tidsakse
+    const t0 = s.t[0], tEnd = span > n - 1 ? t0 + span * r.bar : s.t[n - 1], dur = tEnd - t0;
+    const fx = dur < 2 * 86400 ? d => d.toLocaleTimeString("da-DK", { hour: "2-digit", minute: "2-digit" })
+      : dur < 8 * 86400 ? d => d.toLocaleDateString("da-DK", { weekday: "short", day: "numeric" })
+      : dur < 200 * 86400 ? d => d.toLocaleDateString("da-DK", { day: "numeric", month: "short" })
+      : dur < 800 * 86400 ? d => d.toLocaleDateString("da-DK", { month: "short", year: "2-digit" })
+      : d => String(d.getFullYear());
+    $("xl").innerHTML = [0, 1 / 3, 2 / 3, 1].map(f => {
+      const tt = span > n - 1 ? t0 + f * span * r.bar : s.t[Math.round(f * (n - 1))];
+      return `<span>${esc(fx(new Date(tt * 1000)))}</span>`;
+    }).join("");
+
+    const lg = [];
+    if (marks.some(m => !m.salg)) lg.push('<span><i class="k">K</i>Køb</span>');
+    if (marks.some(m => m.salg)) lg.push('<span><i class="s">S</i>Salg</span>');
+    if (gak != null) lg.push('<span><i class="dash g"></i>Din GAK</span>');
+    if (showBase) lg.push('<span><i class="dash"></i>Lukkekurs i går</span>');
+    $("legend").innerHTML = lg.join("");
+
+    // træk fingeren hen over grafen for at aflæse et punkt
+    const svg = box.firstElementChild, g = svg.querySelector("#scrub"), L = svg.querySelector("#scL"), D = svg.querySelector("#scD");
+    const intraday = r.bar < 86400;
+    const at = e => {
+      const rect = svg.getBoundingClientRect();
+      let i = Math.round((e.clientX - rect.left) / rect.width * span);
+      i = Math.max(0, Math.min(n - 1, i));
+      scrubbing = true;
+      g.setAttribute("visibility", "visible");
+      L.setAttribute("x1", X(i)); L.setAttribute("x2", X(i));
+      D.setAttribute("cx", X(i)); D.setAttribute("cy", Y(s.v[i]));
+      const d = new Date(s.t[i] * 1000);
+      const when = intraday
+        ? d.toLocaleDateString("da-DK", { weekday: "short", day: "numeric", month: "short" }) + " kl. " + d.toLocaleTimeString("da-DK", { hour: "2-digit", minute: "2-digit" })
+        : d.toLocaleDateString("da-DK", { day: "numeric", month: "short", year: "numeric" });
+      readout(s.v[i], s.base, when);
+    };
+    const end = () => { if (!scrubbing) return; scrubbing = false; g.setAttribute("visibility", "hidden"); readout(last, s.base, r.txt); };
+    svg.addEventListener("pointerdown", at);
+    svg.addEventListener("pointermove", e => { if (e.pointerType === "mouse" || e.buttons || e.pressure > 0) at(e); });
+    ["pointerup", "pointerleave", "pointercancel"].forEach(ev => svg.addEventListener(ev, end));
   }
 
   function renderStamp() {
@@ -287,7 +568,7 @@ h1{font-size:30px;font-weight:700;margin:0;line-height:1.1}
       `<br>Kurser hentet ${esc(when)} · 1 USD = ${n2.format(state.fx)} kr`;
   }
 
-  /* ---------- hvornår hentes der? ---------- */
+  /* ---------- knapper og navigation ---------- */
   $("refresh").addEventListener("click", () => refresh(true));
   $("keyForm").addEventListener("submit", e => {
     e.preventDefault();
@@ -296,6 +577,17 @@ h1{font-size:30px;font-weight:700;margin:0;line-height:1.1}
     store.set(KEYSTORE, v);
     refresh(true);
   });
+  $("main").addEventListener("click", e => {
+    const b = e.target.closest("[data-range]");
+    if (b) { range = b.dataset.range; store.set(RANGESTORE, range); scrubbing = false; render(); return; }
+    if (e.target.closest("a.stock")) homeScroll = window.scrollY;
+  });
+  window.addEventListener("hashchange", () => {
+    scrubbing = false; render();
+    window.scrollTo(0, view() ? 0 : homeScroll);
+  });
+  let rz; window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => { scrubbing = false; render(); }, 150); });
+
   // iPhone holder en hjemmeskærms-app i hukommelsen. Derfor hentes der også,
   // hver gang appen kommer frem igen – ikke kun når siden indlæses første gang.
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") refresh(false); });
