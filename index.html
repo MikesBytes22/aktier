@@ -20,6 +20,7 @@
   --fg:#000000; --fg-2:#3C3C43CC; --muted:#6E6E73;
   --accent:#5856D6; --accent-ink:#FFFFFF;
   --up:#1E8E3E; --up-soft:#E3F5E8; --down:#D92D20; --down-soft:#FDE7E5;
+  --c1:#5856D6; --c2:#FF9500; --c3:#0A9FBF; --c4:#FF2D55; --c5:#AF52DE; --c6:#A2845E;
   --display:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,system-ui,sans-serif;
   --round:ui-rounded,"SF Pro Rounded",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
   --r:18px;
@@ -29,15 +30,16 @@
   --fg:#FFFFFF; --fg-2:#EBEBF5B3; --muted:#8E8E93;
   --accent:#7D7AFF; --accent-ink:#FFFFFF;
   --up:#30D158; --up-soft:#0F2E18; --down:#FF453A; --down-soft:#3A1512;
+  --c1:#7D7AFF; --c2:#FF9F0A; --c3:#40C8E0; --c4:#FF375F; --c5:#BF5AF2; --c6:#AC8E68;
 }}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--fg)}
-body{font:16px/1.45 var(--display);min-height:100vh;min-height:100dvh}
+body{font:16px/1.45 var(--display);min-height:100vh;min-height:100dvh;overflow-x:hidden}
 .app{max-width:560px;margin:0 auto;
   padding:calc(env(safe-area-inset-top,0px) + 14px) max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 24px) max(16px,env(safe-area-inset-left,0px))}
 .num{font-family:var(--round);font-variant-numeric:tabular-nums}
-header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px;min-height:42px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:42px}
 h1{font-size:30px;font-weight:700;margin:0;line-height:1.1}
 .back{color:var(--accent);font-weight:600;font-size:17px;text-decoration:none;padding:8px 8px 8px 0;display:inline-flex;align-items:center;gap:2px}
 .back svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
@@ -48,11 +50,22 @@ h1{font-size:30px;font-weight:700;margin:0;line-height:1.1}
 .btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 .btn.busy svg{animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.btn:focus-visible,input:focus-visible,a:focus-visible,.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn:focus-visible,input:focus-visible,a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ibtn{width:36px;height:36px;border:0;border-radius:50%;background:var(--surface-2);color:var(--accent);display:grid;place-items:center;cursor:pointer;touch-action:manipulation;transition:transform .12s ease;flex:none}
+.ibtn:active{transform:scale(.9)}
+.ibtn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+
+/* markedsstatus under overskriften */
+.mkt{display:flex;align-items:center;font-size:13px;color:var(--muted);font-weight:600;margin:6px 0 14px;min-height:18px}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;background:var(--muted);position:relative;flex:none}
+.dot.live{background:var(--up)}
+.dot.live::after{content:"";position:absolute;inset:0;border-radius:50%;background:var(--up);animation:ping 1.8s ease-out infinite}
+@keyframes ping{from{transform:scale(1);opacity:.7}to{transform:scale(2.8);opacity:0}}
 
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
 .stack{display:flex;flex-direction:column;gap:12px}
 .lbl{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.hrow{display:flex;justify-content:space-between;align-items:center;gap:10px}
 
 /* overskrift over grafen: stort tal + ændring i den valgte periode */
 .big{font-size:44px;font-weight:700;line-height:1.05;margin-top:2px;white-space:nowrap}
@@ -61,16 +74,21 @@ h1{font-size:30px;font-weight:700;margin:0;line-height:1.1}
 .chg .when{color:var(--muted);font-weight:500;margin-left:6px}
 
 /* graf */
-.chart{margin:12px -4px 0;height:190px;position:relative;touch-action:pan-y;-webkit-user-select:none;user-select:none}
+.chart{margin:14px -2px 0;height:200px;position:relative;touch-action:pan-y;-webkit-user-select:none;user-select:none}
 .chart svg{display:block;width:100%;height:100%;overflow:visible}
-.chart .ax{font:11px var(--display);fill:var(--muted)}
+.chart .ax{font:600 11px var(--round);fill:var(--muted)}
+.chart .grid{stroke:var(--line);stroke-width:1;stroke-dasharray:3 4}
+.chart .grid.zero{stroke:var(--muted);opacity:.55;stroke-dasharray:4 4}
 .chart .mk{font:700 10px var(--display)}
-.nochart{height:100%;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:14px;text-align:center;padding:0 20px}
-.xl{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-top:4px;min-height:17px}
-.seg{display:flex;background:var(--surface-2);border-radius:11px;padding:3px;gap:2px;margin-top:10px}
-.seg button{flex:1;min-width:0;border:0;background:none;color:var(--fg-2);padding:7px 0;border-radius:8px;font:600 13.5px var(--display);cursor:pointer;touch-action:manipulation}
-.seg button[aria-pressed="true"]{background:var(--surface);color:var(--fg);box-shadow:0 1px 2px rgba(0,0,0,.14)}
+.nochart{height:100%;display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:center;color:var(--muted);font-size:14px;text-align:center;padding:0 20px}
+.nochart svg{width:30px;height:30px;stroke:var(--muted);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;opacity:.7}
+.xl{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-top:4px;min-height:17px;padding-left:44px}
+.seg{display:flex;background:var(--surface-2);border-radius:12px;padding:3px;gap:2px;margin-top:10px}
+.seg button{flex:1;min-width:0;border:0;background:none;color:var(--fg-2);padding:6px 0 5px;border-radius:9px;font:600 13.5px var(--display);cursor:pointer;touch-action:manipulation;display:flex;flex-direction:column;align-items:center;gap:1px;transition:background .2s ease}
+.seg button .p{font-size:10px;font-weight:700;letter-spacing:-.01em}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.16)}
 .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--fg-2);margin-top:10px}
+.legend:empty{display:none}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .legend i{display:inline-block}
 .legend .k,.legend .s{width:16px;height:16px;border-radius:50%;font:700 10px/16px var(--display);text-align:center;font-style:normal}
@@ -78,11 +96,26 @@ h1{font-size:30px;font-weight:700;margin:0;line-height:1.1}
 .legend .s{box-shadow:inset 0 0 0 2px var(--accent);color:var(--accent)}
 .legend .dash{width:18px;border-top:2px dashed var(--muted)}
 .legend .dash.g{border-color:var(--accent)}
+.draw{stroke-dasharray:1;stroke-dashoffset:1;animation:draw .9s cubic-bezier(.3,.7,.2,1) forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.fadein{animation:fade .9s ease both}
+@keyframes fade{from{opacity:0}}
 
 .two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
 .box{background:var(--surface-2);border-radius:12px;padding:10px 12px;min-width:0}
 .box .v{font-size:19px;font-weight:700;line-height:1.2;margin-top:2px;white-space:nowrap}
 .box .s{font-size:13.5px;font-weight:600}
+
+/* indsigter */
+.ins{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -16px;padding:0 16px;scroll-padding:0 16px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.ins::-webkit-scrollbar{display:none}
+.in{flex:0 0 80%;scroll-snap-align:start;display:flex;gap:12px;align-items:flex-start;padding:14px}
+.in:only-child{flex-basis:100%}
+.ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:none;color:#fff}
+.ic svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round}
+.in p{margin:0;font-size:14.5px;line-height:1.38;color:var(--fg-2)}
+.in b{font-weight:650;color:var(--fg)}
+.in .t{font-size:11.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600;margin-bottom:2px}
 
 /* aktiekort */
 a.stock{display:block;color:inherit;text-decoration:none;transition:transform .12s ease}
@@ -92,41 +125,98 @@ a.stock:active{transform:scale(.985)}
 .tick{font-size:12.5px;color:var(--muted);font-weight:600;letter-spacing:.04em;margin-top:2px}
 .stock .price{text-align:right;font-size:17px;font-weight:600;white-space:nowrap}
 .stock .price span{display:block;font-size:12.5px;color:var(--accent);font-weight:600}
-.today{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:12px 0 2px}
-.today .pct{font-size:42px;font-weight:700;line-height:1}
-.today .usd{font-size:17px;font-weight:600}
-.today .tag{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;margin-left:auto}
-.meter{height:6px;border-radius:4px;background:var(--surface-2);overflow:hidden;margin:10px 0 12px;position:relative}
-.meter i{position:absolute;top:0;bottom:0;border-radius:4px}
+.today{display:flex;align-items:flex-end;gap:10px;margin:4px 0 14px}
+.today .pct{font-size:38px;font-weight:700;line-height:1;white-space:nowrap}
+.today .usd{font-size:15.5px;font-weight:600;white-space:nowrap;padding-bottom:2px}
+.spark{width:84px;height:36px;margin-left:auto;flex:none;display:block;overflow:visible}
 .kv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 8px}
 .stock .kv{border-top:1px solid var(--line);padding-top:12px}
 .kv .k{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
 .kv .v{font-size:15.5px;font-weight:600;white-space:nowrap}
 .kv .s{font-size:12.5px;font-weight:600}
-.tx{display:flex;flex-direction:column;margin-top:6px}
-.tx div{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:14.5px}
-.tx div:first-child{border-top:0}
-.tx b{font-weight:600}
-.hint{font-size:14px;color:var(--fg-2);margin:6px 0 0}
-.up{color:var(--up)} .down{color:var(--down)} .flat{color:var(--fg-2)}
-.bg-up{background:var(--up)} .bg-down{background:var(--down)}
 
-.stamp{font-size:13px;color:var(--muted);text-align:center;margin-top:14px;line-height:1.5}
-.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:var(--muted);vertical-align:baseline}
-.dot.live{background:var(--up)}
+/* fordeling */
+.alloc{display:flex;gap:10px;align-items:center;margin-top:10px}
+.donut{width:118px;height:118px;flex:none;overflow:visible}
+.donut .aseg{transition:opacity .25s ease,stroke-width .25s ease;cursor:pointer}
+.donut text{pointer-events:none}
+.donut .dt1{font:600 11px var(--display);fill:var(--muted)}
+.donut .dt2{font:700 15px var(--round);fill:var(--fg)}
+.alist{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.alist button{border:0;background:none;color:var(--fg);font:14.5px var(--display);display:flex;align-items:center;gap:9px;padding:8px 6px;border-radius:9px;cursor:pointer;text-align:left;transition:opacity .25s ease,background .2s ease}
+.alist button.on{background:var(--surface-2)}
+.sw{width:10px;height:10px;border-radius:3px;flex:none}
+.alist .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.alist .pc{font-weight:600}
+.dim{opacity:.28}
+
+/* rekorder */
+.rec{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.rec .box{padding:12px}
+.medal{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:#fff;margin-bottom:8px}
+.medal svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.rec .d{font-size:12.5px;color:var(--muted);font-weight:500;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* udbytte */
+.divbig{font-size:30px;font-weight:700;line-height:1.1;margin:6px 0 14px}
+.divbig small{font-size:16px;font-weight:600;color:var(--fg-2);margin-left:2px}
+
+.tx{display:flex;flex-direction:column;margin-top:6px}
+.tx>div{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line);font-size:14.5px}
+.tx>div>span:first-child{min-width:0}
+.tx small{display:block;color:var(--muted);font-size:12.5px;margin-top:1px}
+.tx .num{text-align:right;white-space:nowrap}
+.tx .tg{display:inline-block;font:700 10px/18px var(--display);width:18px;height:18px;border-radius:50%;text-align:center;margin-right:7px;vertical-align:1px}
+.tx .tg.k{background:var(--accent);color:var(--accent-ink)}
+.tx .tg.s{box-shadow:inset 0 0 0 2px var(--accent);color:var(--accent)}
+.tx>div:first-child{border-top:0}
+.tx b{font-weight:600}
+.hint{font-size:13.5px;color:var(--muted);margin:12px 0 0;line-height:1.4}
+.up{color:var(--up)} .down{color:var(--down)} .flat{color:var(--fg-2)}
+
+.stamp{font-size:12.5px;color:var(--muted);text-align:center;margin-top:16px;line-height:1.5}
 .err{font-size:14px;color:var(--down);background:var(--down-soft);border-radius:12px;padding:10px 12px;margin-bottom:12px}
 .setup p{margin:4px 0 10px;font-size:14.5px;color:var(--fg-2)}
 .setup form{display:flex;gap:8px}
 .setup input{flex:1;min-width:0;border:1px solid var(--line);background:var(--surface-2);color:var(--fg);border-radius:12px;padding:10px 12px;font:16px var(--display)}
 .setup a{color:var(--accent);font-weight:600}
-.skel{height:150px;border-radius:var(--r);background:var(--surface);border:1px solid var(--line);opacity:.6}
-.fresh{animation:pop .3s ease}
-@keyframes pop{from{opacity:.4;transform:translateY(4px)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion:reduce){.fresh,.btn.busy svg{animation:none}}
+.skel{height:170px;border-radius:var(--r);border:1px solid var(--line);
+  background:linear-gradient(100deg,var(--surface) 30%,var(--surface-2) 50%,var(--surface) 70%) 0 0/250% 100%;animation:shim 1.3s linear infinite}
+.skel.s2{height:110px}
+.skel.line{height:10px;width:60%;border:0;border-radius:6px}
+@keyframes shim{from{background-position:100% 0}to{background-position:-150% 0}}
+
+/* skift mellem siderne */
+.in-r{animation:inR .34s cubic-bezier(.2,.8,.2,1)}
+.in-l{animation:inL .34s cubic-bezier(.2,.8,.2,1)}
+@keyframes inR{from{opacity:0;transform:translateX(26px)}}
+@keyframes inL{from{opacity:0;transform:translateX(-26px)}}
+
+/* træk ned for at opdatere */
+.ptr{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 8px);width:36px;height:36px;margin-left:-18px;border-radius:50%;
+  background:var(--surface);border:1px solid var(--line);box-shadow:0 4px 14px rgba(0,0,0,.14);display:grid;place-items:center;
+  opacity:0;transform:scale(.6);z-index:40;pointer-events:none;transition:opacity .2s ease,transform .2s ease}
+.ptr.drag{transition:none}
+.ptr svg{width:18px;height:18px;stroke:var(--accent);fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.ptr.spin svg{animation:spin .8s linear infinite}
+
+/* del-kort */
+.sheet{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.62);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:calc(env(safe-area-inset-top,0px) + 20px) 20px calc(env(safe-area-inset-bottom,0px) + 20px);animation:fade .2s ease}
+.sheet img{max-width:min(84vw,400px);max-height:66vh;border-radius:20px;box-shadow:0 20px 50px rgba(0,0,0,.5);-webkit-touch-callout:default}
+.sheet p{color:#fff;opacity:.75;font-size:14px;margin:0;text-align:center}
+.sheet .row{display:flex;gap:10px}
+.btn.ghost{background:rgba(255,255,255,.18);color:#fff}
+
+@media (prefers-reduced-motion:reduce){
+  .btn.busy svg,.ptr.spin svg,.dot.live::after,.skel,.in-r,.in-l,.fadein,.sheet{animation:none}
+  .draw{animation:none;stroke-dashoffset:0}
+}
 [hidden]{display:none!important}
 </style>
 </head>
 <body>
+<div class="ptr" id="ptr" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 6.3"/><path d="M20 4v7h-7"/></svg></div>
 <div class="app">
   <header>
     <h1 id="title">Mine aktier</h1>
@@ -136,6 +226,7 @@ a.stock:active{transform:scale(.985)}
       <span id="refreshTxt">Opdater</span>
     </button>
   </header>
+  <div class="mkt" id="mkt"></div>
 
   <div class="err" id="err" hidden></div>
 
@@ -152,6 +243,15 @@ a.stock:active{transform:scale(.985)}
   <div class="stamp" id="stamp"></div>
 </div>
 
+<div class="sheet" id="sheet" hidden>
+  <img id="shImg" alt="Del-kort med din portefølje">
+  <p>Tryk og hold på billedet for at gemme det</p>
+  <div class="row">
+    <button class="btn" id="shGo" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>Del</button>
+    <button class="btn ghost" id="shClose" type="button">Luk</button>
+  </div>
+</div>
+
 <!-- tidsstempel på adressen, så rettelser i config.js slår igennem med det samme -->
 <script>document.write('<script src="config.js?t=' + Date.now() + '"><\/script>');</script>
 <script>
@@ -162,25 +262,28 @@ a.stock:active{transform:scale(.985)}
   const MIN_GAP = 10 * 1000;        // mindst 10 sek. mellem automatiske hentninger
   const AUTO_EVERY = 60 * 1000;     // hent selv hvert minut, mens appen er fremme
   const HIST_EVERY = 5 * 60 * 1000; // historikken hentes højst hvert 5. minut
-  // tidsvalg: s = hvilken serie i historik-filen, bar = sekunder pr. punkt
+  // tidsvalg: s = serie i historik-filen, bar = sekunder pr. punkt, span = dage perioden dækker, cut = klip serien til så mange dage
   const RANGES = [
-    { id: "1D",   s: "d1",  bar: 300,    txt: "i dag", slots: 79 },
-    { id: "1U",   s: "d5",  bar: 900,    txt: "seneste uge" },
-    { id: "1M",   s: "m1",  bar: 3600,   txt: "seneste måned" },
-    { id: "3M",   s: "y5",  bar: 86400,  txt: "seneste 3 mdr.", days: 92 },
-    { id: "1Å",   s: "y5",  bar: 86400,  txt: "seneste år", days: 366 },
-    { id: "5Å",   s: "y5",  bar: 86400,  txt: "seneste 5 år" },
+    { id: "1D",   s: "d1",  bar: 300,    txt: "i dag", slots: 79, span: 1 },
+    { id: "1U",   s: "d5",  bar: 900,    txt: "seneste uge", span: 7 },
+    { id: "1M",   s: "m1",  bar: 3600,   txt: "seneste måned", span: 30 },
+    { id: "3M",   s: "y5",  bar: 86400,  txt: "seneste 3 mdr.", span: 91, cut: 92 },
+    { id: "1Å",   s: "y5",  bar: 86400,  txt: "seneste år", span: 365, cut: 366 },
+    { id: "5Å",   s: "y5",  bar: 86400,  txt: "seneste 5 år", span: 1826 },
     { id: "Maks", s: "max", bar: 604800, txt: "hele perioden" },
   ];
+  const Y5 = RANGES[5];
   const $ = id => document.getElementById(id);
   const store = {
     get(k){ try { return localStorage.getItem(k); } catch { return null; } },
     set(k, v){ try { localStorage.setItem(k, v); } catch {} },
   };
+  const reduce = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
 
   let state = null;                 // { quotes:{T:{c,d,dp,pc,t}}, fx, at }
   let hist = {}, histAt = 0, histDone = false;
   let busy = false, lastTry = 0, scrubbing = false, homeScroll = 0;
+  let animNext = true, navAnim = "", allocSel = null, shareFile = null;
   let range = store.get(RANGESTORE) || "1D";
   try { state = JSON.parse(store.get(CACHE)); } catch {}
 
@@ -197,18 +300,55 @@ a.stock:active{transform:scale(.985)}
   const ALLE = AKTIER.concat([...new Set(TX.map(x => x.ticker))].filter(t => !AKTIER.some(a => a.ticker === t)).map(t => ({ ticker: t, antal: 0, gak: 0 })));
 
   /* ---------- formatering ---------- */
-  const nf = (d) => new Intl.NumberFormat("da-DK", { minimumFractionDigits: d, maximumFractionDigits: d });
-  const n0 = nf(0), n2 = nf(2);
+  const NF = {};
+  const nf = (d) => NF[d] || (NF[d] = new Intl.NumberFormat("da-DK", { minimumFractionDigits: d, maximumFractionDigits: d }));
+  const n0 = nf(0), n1 = nf(1), n2 = nf(2);
   const sign = v => v > 0 ? "+" : v < 0 ? "−" : "";
   const kr  = v => n0.format(Math.round(v));
   const skr = v => sign(Math.round(v)) + n0.format(Math.abs(Math.round(v))) + " kr";
-  const pct = v => sign(v) + n2.format(Math.abs(v)) + " %";
+  const pct = v => sign(+v.toFixed(2)) + n2.format(Math.abs(v)) + " %";
+  const pctS = v => sign(+v.toFixed(1)) + n1.format(Math.abs(v)) + "%";
   const usd = v => n2.format(v) + " USD";
-  const susd = v => sign(v) + n2.format(Math.abs(v)) + " USD";
+  const susd = v => sign(+v.toFixed(2)) + n2.format(Math.abs(v)) + " USD";
   const cls = v => v > 0.0001 ? "up" : v < -0.0001 ? "down" : "flat";
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
+  const dato = t => new Date(t * 1000).toLocaleDateString("da-DK", { day: "numeric", month: "short" });
   const view = () => { const h = decodeURIComponent(location.hash.slice(1)); return AKTIER.find(a => a.ticker === h) || null; };
-  const curRange = () => RANGES.find(r => r.id === range) || RANGES[0];
+
+  const ICON = {
+    up: '<path d="M7 17L17 7M9 7h8v8"/>',
+    down: '<path d="M7 7l10 10M17 9v8H9"/>',
+    target: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/>',
+    flame: '<path d="M12 3c1 4 5 5.5 5 10.5a5 5 0 0 1-10 0c0-2.6 1.6-3.8 2.2-5.8 1 1.2 1.6 2 2.8 2.3 0-2.4-.9-4.6 0-7z"/>',
+    star: '<path d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z"/>',
+    cal: '<rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 3v4M15 3v4"/>',
+    peak: '<path d="M3 18l6-8 4 5 3-4 5 7"/>',
+    crown: '<path d="M4 17l-1-9 5 4 4-7 4 7 5-4-1 9z"/><path d="M5 20h14"/>',
+    chart: '<path d="M4 19V5M4 19h16"/><path d="M7 15l4-4 3 3 5-6"/>',
+  };
+  const svgI = n => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICON[n]}</svg>`;
+
+  /* ---------- rullende tal ---------- */
+  const shown = new Map(), anims = new Map();
+  const F = {
+    kr: v => kr(v) + " kr", big: v => `${kr(v)}<small>kr</small>`, bigusd: v => usd(v),
+    skr, pct, susd, usd,
+  };
+  function rollTo(el, k, to, f) {
+    const from = shown.has(k) ? shown.get(k) : to;
+    cancelAnimationFrame(anims.get(k));
+    if (reduce || Math.abs(from - to) < 1e-9) { shown.set(k, to); el.innerHTML = f(to); return; }
+    const t0 = performance.now(), D = 900;
+    el.innerHTML = f(from);
+    const step = now => {
+      const p = Math.min((now - t0) / D, 1), e = 1 - Math.pow(1 - p, 3), v = from + (to - from) * e;
+      shown.set(k, v); el.innerHTML = f(v);
+      if (p < 1) anims.set(k, requestAnimationFrame(step));
+    };
+    anims.set(k, requestAnimationFrame(step));
+  }
+  const R = (k, v, f) => `<span data-roll="${esc(k)}" data-v="${v}" data-f="${f}">${F[f](shown.has(k) ? shown.get(k) : v)}</span>`;
+  const runRolls = root => root.querySelectorAll("[data-roll]").forEach(el => rollTo(el, el.dataset.roll, +el.dataset.v, F[el.dataset.f]));
 
   /* ---------- hent data ---------- */
   async function getJSON(url) {
@@ -256,7 +396,7 @@ a.stock:active{transform:scale(.985)}
       state = { quotes, fx, at: Date.now() };
       store.set(CACHE, JSON.stringify(state));
       showErr("");
-      render(manual);
+      render();
     } catch (e) {
       let msg = e.message;
       if (e.status === 401 || e.status === 403) msg = "Finnhub afviste API-nøglen. Tjek at den er indsat rigtigt.";
@@ -274,8 +414,31 @@ a.stock:active{transform:scale(.985)}
     const btn = $("refresh");
     btn.disabled = b; btn.classList.toggle("busy", b);
     $("refreshTxt").textContent = b ? "Henter…" : "Opdater";
+    if (!b) hidePtr();
   }
   function showErr(m) { $("err").textContent = m; $("err").hidden = !m; }
+
+  /* ---------- perioder: vis kun dem, der giver mening ---------- */
+  const now = () => Date.now() / 1000;
+  function stockAge(t) {
+    const m = hist[t] && hist[t].serier && hist[t].serier.max && hist[t].serier.max.t;
+    return m && m.length ? (now() - m[0]) / 86400 : Infinity;
+  }
+  // hvor mange dage der er data for: en aktie = dens historik, forsiden = siden dit første køb
+  const ageDays = a => a ? stockAge(a.ticker) : TX.length ? (now() - TX[0].t) / 86400 : Math.min(...AKTIER.map(x => stockAge(x.ticker)));
+  const visibleRanges = a => { const age = ageDays(a); return RANGES.filter(r => r.id === "1D" || r.id === "Maks" || r.span < age); };
+  // "Maks" bruger den fineste serie, der dækker hele perioden
+  function eff(r, a) {
+    if (r.id !== "Maks") return r;
+    const age = ageDays(a);
+    if (age <= 28) return { ...r, s: "m1", bar: 3600 };
+    if (age <= 1800) return { ...r, s: "y5", bar: 86400 };
+    return r;
+  }
+  function curRange(a) {
+    const vis = visibleRanges(a);
+    return eff(vis.find(x => x.id === range) || vis[vis.length - 1], a);
+  }
 
   /* ---------- serier til graferne ---------- */
   // kurs over tid for én aktie i den valgte periode; den nyeste live-kurs sættes på som sidste punkt
@@ -289,8 +452,8 @@ a.stock:active{transform:scale(.985)}
       if (q.t - last >= r.bar) { t.push(q.t); v.push(q.c); }
       else if (q.t >= last) v[v.length - 1] = q.c;
     }
-    if (r.days) {
-      const cut = Date.now() / 1000 - r.days * 86400;
+    if (r.cut) {
+      const cut = now() - r.cut * 86400;
       let i = t.findIndex(x => x >= cut); if (i < 0) i = 0;
       t = t.slice(i); v = v.slice(i);
     }
@@ -334,6 +497,14 @@ a.stock:active{transform:scale(.985)}
     };
     return { t, v, base, chg };
   }
+  // udvikling i % for hvert punkt (det grafen tegner)
+  const pctSeries = (s, a) => a ? s.v.map(v => (v / s.base - 1) * 100) : s.v.map((_, i) => s.chg(i).p);
+  function rangeChg(a, r) {
+    const s = a ? stockSeries(a.ticker, r) : portfolioSeries(r);
+    if (!s || s.v.length < 2) return null;
+    const n = s.v.length;
+    return a ? (s.v[n - 1] / s.base - 1) * 100 : s.chg(n - 1).p;
+  }
   function marksFor(a, s, r) {
     const out = [], t0 = s.t[0] - r.bar, t1 = s.t[s.t.length - 1] + r.bar;
     for (const x of TX) {
@@ -341,7 +512,7 @@ a.stock:active{transform:scale(.985)}
       if (x.t < t0 || x.t > t1) continue;
       let bi = 0, bd = Infinity;
       for (let i = 0; i < s.t.length; i++) { const d = Math.abs(s.t[i] - x.t); if (d < bd) { bd = d; bi = i; } }
-      out.push({ i: bi, y: a ? x.kurs : s.v[bi], salg: x.salg });
+      out.push({ i: bi, kurs: x.kurs, salg: x.salg });
     }
     return out;
   }
@@ -361,166 +532,344 @@ a.stock:active{transform:scale(.985)}
     return { rows, value, ret, retPct: cost ? ret / cost * 100 : 0, dayKr: dayUsd * fx, dayPct: prevUsd ? dayUsd / prevUsd * 100 : 0 };
   }
 
-  /* ---------- tegn siden ---------- */
-  const segHTML = () => `<div class="seg" role="group" aria-label="Periode">${RANGES.map(r =>
-    `<button type="button" data-range="${r.id}" aria-pressed="${r.id === curRange().id}">${r.id}</button>`).join("")}</div>`;
-  const chartBlock = () => `<div class="chart" id="chart"></div><div class="xl num" id="xl"></div>${segHTML()}<div class="legend" id="legend"></div>`;
+  /* ---------- markedsstatus (NYSE 9.30–16.00 New York-tid) ---------- */
+  function nyNow() {
+    const p = {};
+    new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", weekday: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" })
+      .formatToParts(new Date()).forEach(x => p[x.type] = x.value);
+    return { wd: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(p.weekday), min: (+p.hour % 24) * 60 + +p.minute };
+  }
+  const dur = m => m < 60 ? `${m} min` : m < 1440 ? `${Math.floor(m / 60)} t ${m % 60} min` : `${Math.floor(m / 1440)} d ${Math.floor(m % 1440 / 60)} t`;
+  function market() {
+    const { wd, min } = nyNow(), O = 570, C = 960;
+    const open = wd >= 1 && wd <= 5 && min >= O && min < C;
+    if (open && state && state.at && Date.now() - state.at < 10 * 60e3) {
+      // åbent efter uret, men ingen nye handler i over en time → helligdag
+      const newest = Math.max(...AKTIER.map(a => ((state.quotes || {})[a.ticker] || {}).t || 0)) * 1000;
+      if (newest && min - O > 60 && state.at - newest > 60 * 60e3) return { open: false, txt: "Markedet holder lukket i dag" };
+    }
+    if (open) return { open: true, txt: `Markedet er åbent · lukker om ${dur(C - min)}` };
+    for (let k = 0; k < 8; k++) {
+      const d = (wd + k) % 7;
+      if (d >= 1 && d <= 5) { const left = k * 1440 + O - min; if (left > 0) return { open: false, txt: `Markedet er lukket · åbner om ${dur(left)}` }; }
+    }
+    return { open: false, txt: "Markedet er lukket" };
+  }
+  function renderMkt() {
+    try { const m = market(); $("mkt").innerHTML = `<span class="dot ${m.open ? "live" : ""}"></span>${esc(m.txt)}`; } catch { $("mkt").innerHTML = ""; }
+  }
 
-  const txList = (list, medNavn) => `<div class="tx">${list.map(x => `<div><span><b>${x.salg ? "Salg" : "Køb"}</b>${medNavn ? " · " + esc(x.navn) : ""} · ${new Date(x.t * 1000).toLocaleDateString("da-DK", medNavn ? { day: "numeric", month: "short" } : { day: "numeric", month: "short", year: "numeric" })}</span><span class="num">${n0.format(x.antal)} stk à ${usd(x.kurs)}</span></div>`).join("")}</div>`;
+  /* ---------- tegn siden ---------- */
+  function segHTML(a) {
+    const cur = curRange(a);
+    return `<div class="seg" role="group" aria-label="Periode">${visibleRanges(a).map(r => {
+      const p = rangeChg(a, eff(r, a));
+      return `<button type="button" data-range="${r.id}" aria-pressed="${r.id === cur.id}"><span>${r.id}</span><span class="p num ${p == null ? "flat" : cls(p)}">${p == null ? "–" : pctS(p)}</span></button>`;
+    }).join("")}</div>`;
+  }
+  const chartBlock = a => `<div class="chart" id="chart"></div><div class="xl num" id="xl"></div>${segHTML(a)}<div class="legend" id="legend"></div>`;
+
+  const txList = (list, medNavn) => `<div class="tx">${list.map(x => {
+    const d = new Date(x.t * 1000).toLocaleDateString("da-DK", { day: "numeric", month: "short", year: "numeric" });
+    return `<div><span><b><i class="tg ${x.salg ? "s" : "k"}">${x.salg ? "S" : "K"}</i>${medNavn ? esc(x.navn) : (x.salg ? "Salg" : "Køb")}</b><small>${medNavn ? (x.salg ? "Salg" : "Køb") + " · " : ""}${d}</small></span><span class="num">${n0.format(x.antal)} stk<small>à ${usd(x.kurs)}</small></span></div>`;
+  }).join("")}</div>`;
+
+  // lille kurve over dagens kursudvikling på hvert aktiekort
+  function spark(a, q) {
+    const r = RANGES[0], s = stockSeries(a.ticker, r);
+    if (!s || s.v.length < 2) return '<span class="spark"></span>';
+    const n = s.v.length, span = Math.max(r.slots - 1, n - 1), W = 100, H = 36;
+    let lo = Math.min(s.base, ...s.v), hi = Math.max(s.base, ...s.v);
+    if (hi === lo) { hi += 0.01; lo -= 0.01; }
+    const X = i => (i / span * W).toFixed(1), Y = v => (3 + (1 - (v - lo) / (hi - lo)) * (H - 6)).toFixed(1);
+    let d = ""; for (let i = 0; i < n; i++) d += (i ? "L" : "M") + X(i) + "," + Y(s.v[i]);
+    const col = q.d >= 0 ? "var(--up)" : "var(--down)";
+    return `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">
+      <line x1="0" x2="${W}" y1="${Y(s.base)}" y2="${Y(s.base)}" style="stroke:var(--muted)" stroke-width="1" stroke-dasharray="2 3" vector-effect="non-scaling-stroke" opacity=".7"/>
+      <path d="${d}" fill="none" style="stroke:${col}" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+      <circle cx="${X(n - 1)}" cy="${Y(s.v[n - 1])}" r="2.2" style="fill:${col}"/></svg>`;
+  }
+
+  function insightsHTML(c) {
+    const out = [], add = (ic, bg, t, txt) => out.push({ ic, bg, t, txt });
+    const byDay = c.rows.slice().sort((x, y) => y.q.dp - x.q.dp);
+    if (byDay[0].q.dp >= 1) add("up", "var(--up)", "I dag", `<b>${esc(byDay[0].a.navn)}</b> trækker op med <b>${pct(byDay[0].q.dp)}</b>`);
+    const w = byDay[byDay.length - 1];
+    if (w !== byDay[0] && w.q.dp <= -1) add("down", "var(--down)", "I dag", `<b>${esc(w.a.navn)}</b> trækker ned med <b>${pct(w.q.dp)}</b>`);
+    for (const r of c.rows) if (r.retPct < 0)
+      add("target", "var(--accent)", "Mod din GAK", `<b>${esc(r.a.navn)}</b> skal stige <b>${pct((r.a.gak / r.q.c - 1) * 100)}</b> for at nå din GAK på ${usd(r.a.gak)}`);
+    const top = c.rows.slice().sort((x, y) => y.retPct - x.retPct)[0];
+    if (top.retPct > 0) add("star", "var(--c2)", "Bedste aktie", `<b>${esc(top.a.navn)}</b> giver mest med <b>${pct(top.retPct)}</b> i afkast`);
+    for (const r of c.rows) {
+      const s = stockSeries(r.a.ticker, Y5);
+      if (!s || s.v.length < 20) continue;
+      const v = s.v, n = v.length, dir = Math.sign(v[n - 1] - v[n - 2]);
+      let k = 0; for (let i = n - 1; i > 0 && dir && Math.sign(v[i] - v[i - 1]) === dir; i--) k++;
+      if (k >= 3) add("flame", dir > 0 ? "var(--up)" : "var(--down)", "Stime", `<b>${esc(r.a.navn)}</b> er ${dir > 0 ? "steget" : "faldet"} <b>${k} dage i træk</b>`);
+      const yr = v.slice(-252), mx = Math.max(...yr), mn = Math.min(...yr);
+      if (v[n - 1] >= mx * 0.98) add("peak", "var(--up)", "1-års top", `<b>${esc(r.a.navn)}</b> er tæt på sit højeste niveau i et år (${usd(mx)})`);
+      else if (v[n - 1] <= mn * 1.02) add("peak", "var(--down)", "1-års bund", `<b>${esc(r.a.navn)}</b> er tæt på sit laveste niveau i et år (${usd(mn)})`);
+    }
+    if (TX.length) add("cal", "var(--c3)", "Din rejse", `Du har været investor i <b>${Math.max(1, Math.floor((now() - TX[0].t) / 86400))} dage</b> og lavet <b>${TX.length} handler</b>`);
+    if (!out.length) return "";
+    return `<div class="ins" role="list" aria-label="Indsigter">${out.map(x => `
+      <div class="card in" role="listitem"><div class="ic" style="background:${x.bg}">${svgI(x.ic)}</div>
+        <div><div class="t">${x.t}</div><p>${x.txt}</p></div></div>`).join("")}</div>`;
+  }
+
+  function allocHTML(c) {
+    if (c.rows.length < 2 || !c.value) return "";
+    const RAD = 52, C = 2 * Math.PI * RAD, gap = 3;
+    let acc = 0;
+    const segs = c.rows.map((r, i) => {
+      const f = r.val / c.value, len = Math.max(f * C - gap, 0.5);
+      const s = `<circle class="aseg" data-alloc="${i}" cx="70" cy="70" r="${RAD}" fill="none" style="stroke:var(--c${i % 6 + 1})" stroke-width="18" stroke-dasharray="${len.toFixed(2)} ${C.toFixed(2)}" stroke-dashoffset="${(-acc * C).toFixed(2)}" transform="rotate(-90 70 70)"/>`;
+      acc += f; return s;
+    }).join("");
+    const rows = c.rows.map((r, i) => `<button type="button" data-alloc="${i}"><i class="sw" style="background:var(--c${i % 6 + 1})"></i><span class="nm">${esc(r.a.navn)}</span><span class="pc num">${n1.format(r.val / c.value * 100)} %</span></button>`).join("");
+    return `<section class="card"><div class="lbl">Fordeling</div>
+      <div class="alloc"><svg class="donut fadein" viewBox="0 0 140 140" role="img" aria-label="Fordeling af porteføljen">${segs}
+        <text id="aT1" x="70" y="66" text-anchor="middle" class="dt1"></text><text id="aT2" x="70" y="85" text-anchor="middle" class="dt2"></text></svg>
+      <div class="alist">${rows}</div></div></section>`;
+  }
+  function applyAlloc(c) {
+    const t1 = $("aT1"), t2 = $("aT2"); if (!t1) return;
+    document.querySelectorAll("[data-alloc]").forEach(el => {
+      const on = allocSel != null && +el.dataset.alloc === allocSel;
+      el.classList.toggle("dim", allocSel != null && !on);
+      el.classList.toggle("on", on);
+      if (el.tagName === "circle") el.setAttribute("stroke-width", on ? 24 : 18);
+    });
+    if (allocSel == null || !c.rows[allocSel]) { t1.textContent = `${c.rows.length} aktier`; t2.textContent = `${kr(c.value)} kr`; return; }
+    const r = c.rows[allocSel], nm = r.a.navn;
+    t1.textContent = nm.length > 16 ? nm.slice(0, 15) + "…" : nm;
+    t2.textContent = `${kr(r.val)} kr`;
+  }
+
+  function recordsHTML(c) {
+    const s = portfolioSeries(Y5);
+    if (!s || s.v.length < 3) return "";
+    let mi = 0; s.v.forEach((v, i) => { if (v > s.v[mi]) mi = i; });
+    let best = null, worst = null;
+    for (let i = 1; i < s.v.length; i++) {
+      let net = 0;
+      for (const x of TX) if (x.t > s.t[i - 1] && x.t <= s.t[i]) { const b = x.antal * x.kurs * state.fx; net += x.salg ? -b : b; }
+      const d = s.v[i] - s.v[i - 1] - net;
+      if (!best || d > best.d) best = { d, t: s.t[i] };
+      if (!worst || d < worst.d) worst = { d, t: s.t[i] };
+    }
+    const top = c.rows.slice().sort((x, y) => y.retPct - x.retPct)[0];
+    const tile = (ic, bg, k, v, vc, d) => `<div class="box"><div class="medal" style="background:${bg}">${svgI(ic)}</div>
+      <div class="lbl">${k}</div><div class="v num ${vc}">${v}</div><div class="d">${d}</div></div>`;
+    return `<section class="card"><div class="lbl">Rekorder</div><div class="rec">
+      ${tile("crown", "#E0A800", "Højeste værdi", `${kr(s.v[mi])} kr`, "", dato(s.t[mi]))}
+      ${tile("star", "var(--accent)", "Bedste aktie", pct(top.retPct), cls(top.retPct), esc(top.a.navn))}
+      ${best && best.d > 0 ? tile("up", "var(--up)", "Bedste dag", skr(best.d), "up", dato(best.t)) : ""}
+      ${worst && worst.d < 0 ? tile("down", "var(--down)", "Værste dag", skr(worst.d), "down", dato(worst.t)) : ""}
+    </div></section>`;
+  }
+
+  // udbytte: hvad du får for dine aktier (data fra GitHub-historikken)
+  function divHTML(a, q) {
+    const h = hist[a.ticker];
+    if (!h || !Array.isArray(h.udbytte)) return "";
+    const d = h.udbytte, fx = state.fx;
+    const head = `<section class="card"><div class="lbl">Udbytte</div>`;
+    if (!d.length) return `${head}<p class="hint" style="margin-top:6px">${esc(a.navn)} udbetaler ikke udbytte.</p></section>`;
+    const y = d.filter(x => x.t > now() - 365 * 86400), aar = y.reduce((s, x) => s + x.v, 0);
+    if (!aar) return `${head}<p class="hint" style="margin-top:6px">${esc(a.navn)} har ikke udbetalt udbytte det seneste år.</p></section>`;
+    const last = d[d.length - 1];
+    const gaps = d.slice(-5).map((x, i, arr) => i ? x.t - arr[i - 1].t : 0).filter(Boolean).sort((p, r) => p - r);
+    const step = gaps.length ? gaps[Math.floor(gaps.length / 2)] : 0;
+    let next = step ? last.t + step : 0;
+    while (next && next < now() - 2 * 86400) next += step;
+    const year = a.antal * aar * fx, per = a.antal * last.v * fx;
+    return `${head}
+      <div class="divbig num up">ca. ${kr(year)} kr<small>om året</small></div>
+      <div class="kv">
+        <div><div class="k">Hver gang</div><div class="v num">${kr(per)} kr</div><div class="s flat">${y.length} gange om året</div></div>
+        <div><div class="k">Pr. aktie</div><div class="v num">${n2.format(last.v)}</div><div class="s flat">USD</div></div>
+        <div><div class="k">Direkte rente</div><div class="v num">${n2.format(aar / q.c * 100)} %</div></div>
+        <div><div class="k">Næste ex-dato</div><div class="v num">${next ? "ca. " + dato(next) : "–"}</div></div>
+        <div><div class="k">Seneste</div><div class="v num">${dato(last.t)}</div></div>
+      </div>
+      <p class="hint">Før skat. Beregnet ud fra det seneste års udbytte, dit antal aktier og dagens dollarkurs. Du skal eje aktien før ex-datoen for at få udbyttet.</p>
+    </section>`;
+  }
 
   function homeHTML(c) {
     const cards = c.rows.map(({ a, q, val, ret, retPct }) => {
-      const k = cls(q.dp);
-      const w = Math.min(Math.abs(q.dp) / 5, 1) * 50;   // måler: 0 i midten, fuldt udslag ved ±5 % på dagen
-      const bar = k === "flat" ? "" : `<i class="bg-${k}" style="${q.dp >= 0 ? "left:50%" : "right:50%"};width:${w.toFixed(1)}%"></i>`;
+      const k = cls(q.dp), t = a.ticker;
       return `
-      <a class="card stock" href="#${encodeURIComponent(a.ticker)}">
+      <a class="card stock" href="#${encodeURIComponent(t)}">
         <div class="top">
-          <div style="min-width:0"><div class="name">${esc(a.navn)}</div><div class="tick">${esc(a.ticker)} · ${n0.format(a.antal)} stk</div></div>
-          <div class="price num">${usd(q.c)}<span>Se graf ›</span></div>
+          <div style="min-width:0"><div class="name">${esc(a.navn)}</div><div class="tick">${esc(t)} · ${n0.format(a.antal)} stk</div></div>
+          <div class="price num">${R("c:" + t, q.c, "usd")}<span>Se graf ›</span></div>
         </div>
+        <div class="lbl" style="margin-top:12px">I dag</div>
         <div class="today">
-          <div class="pct num ${k}">${pct(q.dp)}</div>
-          <div class="usd num ${k}">${susd(q.d)}</div>
-          <div class="tag">I dag</div>
+          <div class="pct num ${k}">${R("dp:" + t, q.dp, "pct")}</div>
+          <div class="usd num ${k}">${R("d:" + t, q.d, "susd")}</div>
+          ${spark(a, q)}
         </div>
-        <div class="meter">${bar}</div>
         <div class="kv">
-          <div><div class="k">Værdi</div><div class="v num">${kr(val)} kr</div></div>
-          <div><div class="k">Afkast</div><div class="v num ${cls(ret)}">${skr(ret)}</div><div class="s num ${cls(ret)}">${pct(retPct)}</div></div>
+          <div><div class="k">Værdi</div><div class="v num">${R("val:" + t, val, "kr")}</div></div>
+          <div><div class="k">Afkast</div><div class="v num ${cls(ret)}">${R("ret:" + t, ret, "skr")}</div><div class="s num ${cls(ret)}">${R("rp:" + t, retPct, "pct")}</div></div>
           <div><div class="k">GAK</div><div class="v num">${n2.format(a.gak)}</div><div class="s flat">USD</div></div>
         </div>
       </a>`;
     }).join("");
     return `
       <section class="card hero">
-        <div class="lbl">Samlet værdi</div>
+        <div class="hrow"><div class="lbl">Samlet værdi</div>
+          <button class="ibtn" type="button" data-share aria-label="Del din udvikling">${svgI("chart").replace('aria-hidden="true"', 'aria-hidden="true"')}</button></div>
         <div class="big num" id="roVal"></div>
         <div class="chg num" id="roChg"></div>
-        ${chartBlock()}
+        ${chartBlock(null)}
         <div class="two">
           <div class="box"><div class="lbl">Samlet afkast</div>
-            <div class="v num ${cls(c.ret)}">${skr(c.ret)}</div>
-            <div class="s num ${cls(c.ret)}">${pct(c.retPct)}</div></div>
+            <div class="v num ${cls(c.ret)}">${R("ret", c.ret, "skr")}</div>
+            <div class="s num ${cls(c.ret)}">${R("retp", c.retPct, "pct")}</div></div>
           <div class="box"><div class="lbl">I dag</div>
-            <div class="v num ${cls(c.dayKr)}">${skr(c.dayKr)}</div>
-            <div class="s num ${cls(c.dayKr)}">${pct(c.dayPct)}</div></div>
+            <div class="v num ${cls(c.dayKr)}">${R("day", c.dayKr, "skr")}</div>
+            <div class="s num ${cls(c.dayKr)}">${R("dayp", c.dayPct, "pct")}</div></div>
         </div>
-      </section>${cards}${TX.length ? `
-      <section class="card"><div class="lbl">Køb og salg</div>${txList(TX.slice().reverse(), true)}</section>` : ""}`;
+      </section>
+      ${insightsHTML(c)}
+      ${cards}
+      ${allocHTML(c)}
+      ${recordsHTML(c)}
+      ${TX.length ? `<section class="card"><div class="lbl">Køb og salg</div>${txList(TX.slice().reverse(), true)}</section>` : ""}`;
   }
 
   function stockHTML(c, a) {
-    const { q, val, ret, retPct } = c.rows.find(r => r.a === a);
-    const tx = TX.filter(x => x.ticker === a.ticker).slice().reverse();
+    const { q, val, ret, retPct } = c.rows.find(r => r.a === a), t = a.ticker;
+    const tx = TX.filter(x => x.ticker === t).slice().reverse();
     const txHTML = tx.length
       ? txList(tx, false)
       : `<p class="hint">Ingen handler lagt ind endnu. Når købsdatoen er lagt ind, vises købet som en cirkel på grafen.</p>`;
     return `
       <section class="card">
         <div class="name">${esc(a.navn)}</div>
-        <div class="tick">${esc(a.ticker)} · ${n0.format(a.antal)} stk</div>
+        <div class="tick">${esc(t)} · ${n0.format(a.antal)} stk</div>
         <div class="big num" id="roVal" style="margin-top:10px"></div>
         <div class="chg num" id="roChg"></div>
-        ${chartBlock()}
+        ${chartBlock(a)}
       </section>
       <section class="card">
         <div class="kv">
-          <div><div class="k">Værdi</div><div class="v num">${kr(val)} kr</div></div>
-          <div><div class="k">Afkast</div><div class="v num ${cls(ret)}">${skr(ret)}</div><div class="s num ${cls(ret)}">${pct(retPct)}</div></div>
-          <div><div class="k">I dag</div><div class="v num ${cls(q.dp)}">${pct(q.dp)}</div><div class="s num ${cls(q.dp)}">${susd(q.d)}</div></div>
+          <div><div class="k">Værdi</div><div class="v num">${R("val:" + t, val, "kr")}</div></div>
+          <div><div class="k">Afkast</div><div class="v num ${cls(ret)}">${R("ret:" + t, ret, "skr")}</div><div class="s num ${cls(ret)}">${R("rp:" + t, retPct, "pct")}</div></div>
+          <div><div class="k">I dag</div><div class="v num ${cls(q.dp)}">${R("dp:" + t, q.dp, "pct")}</div><div class="s num ${cls(q.dp)}">${R("d:" + t, q.d, "susd")}</div></div>
           <div><div class="k">Antal</div><div class="v num">${n0.format(a.antal)} stk</div></div>
           <div><div class="k">GAK</div><div class="v num">${n2.format(a.gak)}</div><div class="s flat">USD</div></div>
           <div><div class="k">Lukkede i går</div><div class="v num">${n2.format(q.pc)}</div><div class="s flat">USD</div></div>
         </div>
       </section>
+      ${divHTML(a, q)}
       <section class="card">
         <div class="lbl">Køb og salg</div>
         ${txHTML}
       </section>`;
   }
 
-  function render(fresh) {
+  function render() {
     if (scrubbing) return;
+    renderMkt();
     const main = $("main"), a = view();
     $("title").hidden = !!a; $("back").hidden = !a;
     document.title = a ? a.navn : "Mine aktier";
     const have = state && state.fx && AKTIER.every(x => state.quotes && state.quotes[x.ticker]);
     if (!have) {
-      main.innerHTML = key() ? '<div class="skel"></div><div class="skel"></div>' : "";
+      main.innerHTML = key() ? '<div class="skel"></div><div class="skel s2"></div><div class="skel s2"></div>' : "";
       $("stamp").textContent = "";
       return;
     }
     const c = compute();
     main.innerHTML = a ? stockHTML(c, a) : homeHTML(c);
+    runRolls(main);
     drawChart(c, a);
-    if (fresh) { main.classList.remove("fresh"); void main.offsetWidth; main.classList.add("fresh"); }
+    if (!a) applyAlloc(c);
+    if (navAnim) { main.classList.remove("in-r", "in-l"); void main.offsetWidth; main.classList.add(navAnim); navAnim = ""; }
     renderStamp();
   }
 
-  /* ---------- grafen ---------- */
+  /* ---------- grafen: udvikling i % ---------- */
+  function ticks(lo, hi) {
+    const raw = (hi - lo) / 4;
+    const step = [0.05, 0.1, 0.2, 0.25, 0.5, 1, 2, 2.5, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000].find(x => x >= raw) || raw;
+    const out = [];
+    for (let v = Math.ceil(lo / step) * step; v <= hi + 1e-9; v += step) out.push(Math.abs(v) < 1e-9 ? 0 : +v.toFixed(6));
+    const dec = step < 0.1 ? 2 : step < 1 ? 1 : 0;
+    return { out, fmt: v => v === 0 ? "0%" : sign(v) + nf(dec).format(Math.abs(v)) + "%" };
+  }
+
   function drawChart(c, a) {
     const box = $("chart"); if (!box) return;
-    const r = curRange();
-    const fmtVal = a ? (v => usd(v)) : (v => `${kr(v)}<small>kr</small>`);
-    const fmtAx = a ? (v => n2.format(v)) : (v => n0.format(Math.round(v)));
+    const r = curRange(a);
+    const fmtVal = a ? F.bigusd : F.big;
     const fmtChg = a ? (d => susd(d)) : (d => skr(d));
+    const rk = "ro:" + (a ? a.ticker : "home");
     const live = a ? c.rows.find(x => x.a === a).q.c : c.value;
     const s = a ? stockSeries(a.ticker, r) : portfolioSeries(r);
 
-    const readout = (val, i, when) => {
-      $("roVal").innerHTML = fmtVal(val);
+    const readout = (val, i, when, scrub) => {
+      if (scrub) { cancelAnimationFrame(anims.get(rk)); $("roVal").innerHTML = fmtVal(val); }
+      else rollTo($("roVal"), rk, val, fmtVal);
       if (i == null) { $("roChg").innerHTML = ""; return; }
       const { d, p } = s.chg ? s.chg(i) : { d: val - s.base, p: s.base ? (val - s.base) / s.base * 100 : 0 };
       $("roChg").innerHTML = `<span class="${cls(d)}">${fmtChg(d)} (${pct(p)})</span><span class="when">${esc(when)}</span>`;
     };
 
     if (!s || s.v.length < 2) {
-      box.innerHTML = `<div class="nochart">${histDone ? "Ingen kurshistorik for denne periode endnu." : "Henter kurshistorik…"}</div>`;
+      box.innerHTML = histDone
+        ? `<div class="nochart">${svgI("chart")}<span>Ingen kurshistorik for denne periode endnu.<br>Den kommer, når GitHub har hentet den.</span></div>`
+        : `<div class="nochart"><div class="skel line"></div><div class="skel line" style="width:40%"></div></div>`;
       $("xl").innerHTML = ""; $("legend").innerHTML = "";
       readout(live, null);
       return;
     }
-    const n = s.v.length, last = s.v[n - 1];
+    const n = s.v.length, last = s.v[n - 1], ys = pctSeries(s, a);
     readout(last, n - 1, r.txt);
 
-    const W = Math.max(box.clientWidth, 200), H = 190, pt = 14, pb = 8;
-    const marks = marksFor(a, s, r);
-    let lo = Math.min(...s.v), hi = Math.max(...s.v);
-    const showBase = r.id === "1D";
-    if (showBase) { lo = Math.min(lo, s.base); hi = Math.max(hi, s.base); }
+    const W = Math.max(box.clientWidth, 200), H = 200, pt = 12, pb = 6;
+    const marks = marksFor(a, s, r).map(m => ({ ...m, y: a ? (m.kurs / s.base - 1) * 100 : ys[m.i] }));
+    let lo = Math.min(0, ...ys), hi = Math.max(0, ...ys);
     for (const m of marks) { lo = Math.min(lo, m.y); hi = Math.max(hi, m.y); }
     // GAK-linjen vises kun, når den ligger nogenlunde i nærheden – ellers trykker den kurven flad
     let gak = null;
-    if (a) { const sp = (hi - lo) || hi * 0.01; if (a.gak > lo - sp && a.gak < hi + sp) { gak = a.gak; lo = Math.min(lo, gak); hi = Math.max(hi, gak); } }
-    if (hi === lo) { hi += 1; lo -= 1; }
-    const pad = (hi - lo) * 0.08; lo -= pad; hi += pad;
+    if (a) { const g = (a.gak / s.base - 1) * 100, sp = (hi - lo) || 1; if (g > lo - sp && g < hi + sp) { gak = g; lo = Math.min(lo, g); hi = Math.max(hi, g); } }
+    if (hi - lo < 0.4) { hi += 0.2; lo -= 0.2; }
+    const pad = (hi - lo) * 0.1; lo -= pad; hi += pad;
     const span = r.slots && n <= r.slots ? r.slots - 1 : n - 1;   // 1D: aksen dækker hele handelsdagen
-    const X = i => i / span * W, Y = v => pt + (1 - (v - lo) / (hi - lo)) * (H - pt - pb);
+    const GL = 44;   // venstre margen til %-aksen
+    const X = i => GL + i / span * (W - GL), Y = v => pt + (1 - (v - lo) / (hi - lo)) * (H - pt - pb);
     // Farven følger dit afkast: grøn når kursen ligger over din GAK (forsiden: samlet afkast i plus)
     const up = a ? last >= a.gak : c.ret >= 0, col = up ? "var(--up)" : "var(--down)";
     let line = "";
-    for (let i = 0; i < n; i++) line += (i ? "L" : "M") + X(i).toFixed(1) + "," + Y(s.v[i]).toFixed(1);
-    const area = `${line}L${X(n - 1).toFixed(1)},${H}L0,${H}Z`;
-    const hline = (v, stroke) => `<line x1="0" x2="${W}" y1="${Y(v).toFixed(1)}" y2="${Y(v).toFixed(1)}" style="stroke:${stroke}" stroke-width="1.5" stroke-dasharray="4 4" opacity=".75"/>`;
+    for (let i = 0; i < n; i++) line += (i ? "L" : "M") + X(i).toFixed(1) + "," + Y(ys[i]).toFixed(1);
+    const area = `${line}L${X(n - 1).toFixed(1)},${H}L${GL},${H}Z`;
+    const tk = ticks(lo, hi);
+    const grid = tk.out.map(v => {
+      const y = Y(v);
+      return `<line class="grid${v === 0 ? " zero" : ""}" x1="${GL}" x2="${W}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}"/><text class="ax" x="${GL - 7}" y="${(y + 4).toFixed(1)}" text-anchor="end">${tk.fmt(v)}</text>`;
+    }).join("");
     const mk = marks.map(m => {
       const x = X(m.i).toFixed(1), y = Y(m.y).toFixed(1);
       return m.salg
         ? `<circle cx="${x}" cy="${y}" r="9" style="fill:var(--surface);stroke:var(--accent)" stroke-width="2.5"/><text class="mk" x="${x}" y="${y}" dy="3.5" text-anchor="middle" style="fill:var(--accent)">S</text>`
         : `<circle cx="${x}" cy="${y}" r="9" style="fill:var(--accent);stroke:var(--surface)" stroke-width="2"/><text class="mk" x="${x}" y="${y}" dy="3.5" text-anchor="middle" style="fill:var(--accent-ink)">K</text>`;
     }).join("");
+    const anim = animNext && !reduce; animNext = false;
     box.innerHTML = `
-      <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Kursgraf, ${esc(r.txt)}">
+      <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Udvikling i procent, ${esc(r.txt)}">
         <defs><linearGradient id="gr" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" style="stop-color:${col};stop-opacity:.26"/><stop offset="1" style="stop-color:${col};stop-opacity:0"/></linearGradient></defs>
-        <path d="${area}" fill="url(#gr)"/>
-        ${showBase ? hline(s.base, "var(--muted)") : ""}
-        ${gak != null ? hline(gak, "var(--accent)") : ""}
-        <path d="${line}" fill="none" style="stroke:${col}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
-        <text class="ax" x="${W - 2}" y="11" text-anchor="end">${fmtAx(hi - pad)}</text>
-        <text class="ax" x="${W - 2}" y="${H - 2}" text-anchor="end">${fmtAx(lo + pad)}</text>
-        ${mk}
-        <circle cx="${X(n - 1).toFixed(1)}" cy="${Y(last).toFixed(1)}" r="4" style="fill:${col}"/>
+        ${grid}
+        <path d="${area}" fill="url(#gr)" class="${anim ? "fadein" : ""}"/>
+        ${gak != null ? `<line x1="${GL}" x2="${W}" y1="${Y(gak).toFixed(1)}" y2="${Y(gak).toFixed(1)}" style="stroke:var(--accent)" stroke-width="1.5" stroke-dasharray="5 4" opacity=".85"/>` : ""}
+        <path d="${line}" fill="none" style="stroke:${col}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" ${anim ? 'pathLength="1" class="draw"' : ""}/>
+        <g class="${anim ? "fadein" : ""}">${mk}<circle cx="${X(n - 1).toFixed(1)}" cy="${Y(ys[n - 1]).toFixed(1)}" r="4" style="fill:${col}"/></g>
         <g id="scrub" visibility="hidden">
           <line id="scL" y1="0" y2="${H}" style="stroke:var(--muted)" stroke-width="1"/>
           <circle id="scD" r="5.5" style="fill:${col};stroke:var(--surface)" stroke-width="2.5"/>
@@ -528,11 +877,11 @@ a.stock:active{transform:scale(.985)}
       </svg>`;
 
     // tidsakse
-    const t0 = s.t[0], tEnd = span > n - 1 ? t0 + span * r.bar : s.t[n - 1], dur = tEnd - t0;
-    const fx = dur < 2 * 86400 ? d => d.toLocaleTimeString("da-DK", { hour: "2-digit", minute: "2-digit" })
-      : dur < 8 * 86400 ? d => d.toLocaleDateString("da-DK", { weekday: "short", day: "numeric" })
-      : dur < 200 * 86400 ? d => d.toLocaleDateString("da-DK", { day: "numeric", month: "short" })
-      : dur < 800 * 86400 ? d => d.toLocaleDateString("da-DK", { month: "short", year: "2-digit" })
+    const t0 = s.t[0], tEnd = span > n - 1 ? t0 + span * r.bar : s.t[n - 1], dd = tEnd - t0;
+    const fx = dd < 2 * 86400 ? d => d.toLocaleTimeString("da-DK", { hour: "2-digit", minute: "2-digit" })
+      : dd < 8 * 86400 ? d => d.toLocaleDateString("da-DK", { weekday: "short", day: "numeric" })
+      : dd < 200 * 86400 ? d => d.toLocaleDateString("da-DK", { day: "numeric", month: "short" })
+      : dd < 800 * 86400 ? d => d.toLocaleDateString("da-DK", { month: "short", year: "2-digit" })
       : d => String(d.getFullYear());
     $("xl").innerHTML = [0, 1 / 3, 2 / 3, 1].map(f => {
       const tt = span > n - 1 ? t0 + f * span * r.bar : s.t[Math.round(f * (n - 1))];
@@ -543,7 +892,7 @@ a.stock:active{transform:scale(.985)}
     if (marks.some(m => !m.salg)) lg.push('<span><i class="k">K</i>Køb</span>');
     if (marks.some(m => m.salg)) lg.push('<span><i class="s">S</i>Salg</span>');
     if (gak != null) lg.push('<span><i class="dash g"></i>Din GAK</span>');
-    if (showBase) lg.push('<span><i class="dash"></i>Lukkekurs i går</span>');
+    if (r.id === "1D") lg.push('<span><i class="dash"></i>0% = lukkekurs i går</span>');
     $("legend").innerHTML = lg.join("");
 
     // træk fingeren hen over grafen for at aflæse et punkt
@@ -551,17 +900,17 @@ a.stock:active{transform:scale(.985)}
     const intraday = r.bar < 86400;
     const at = e => {
       const rect = svg.getBoundingClientRect();
-      let i = Math.round((e.clientX - rect.left) / rect.width * span);
+      let i = Math.round((e.clientX - rect.left - GL * rect.width / W) / (rect.width * (W - GL) / W) * span);
       i = Math.max(0, Math.min(n - 1, i));
       scrubbing = true;
       g.setAttribute("visibility", "visible");
       L.setAttribute("x1", X(i)); L.setAttribute("x2", X(i));
-      D.setAttribute("cx", X(i)); D.setAttribute("cy", Y(s.v[i]));
+      D.setAttribute("cx", X(i)); D.setAttribute("cy", Y(ys[i]));
       const d = new Date(s.t[i] * 1000);
       const when = intraday
         ? d.toLocaleDateString("da-DK", { weekday: "short", day: "numeric", month: "short" }) + " kl. " + d.toLocaleTimeString("da-DK", { hour: "2-digit", minute: "2-digit" })
         : d.toLocaleDateString("da-DK", { day: "numeric", month: "short", year: "numeric" });
-      readout(s.v[i], i, when);
+      readout(s.v[i], i, when, true);
     };
     const end = () => { if (!scrubbing) return; scrubbing = false; g.setAttribute("visibility", "hidden"); readout(last, n - 1, r.txt); };
     svg.addEventListener("pointerdown", at);
@@ -571,16 +920,112 @@ a.stock:active{transform:scale(.985)}
 
   function renderStamp() {
     if (!state || !state.at) return;
-    const at = new Date(state.at), now = new Date();
+    const at = new Date(state.at), nw = new Date();
     const time = at.toLocaleTimeString("da-DK", { hour: "2-digit", minute: "2-digit" });
-    const sameDay = at.toDateString() === now.toDateString();
-    const when = sameDay ? "i dag kl. " + time : at.toLocaleDateString("da-DK", { day: "numeric", month: "short" }) + " kl. " + time;
-    const newest = Math.max(...AKTIER.map(a => (state.quotes[a.ticker] || {}).t || 0)) * 1000;
-    const open = state.at - newest < 20 * 60 * 1000;
-    $("stamp").innerHTML =
-      `<span class="dot ${open ? "live" : ""}"></span>${open ? "Markedet er åbent" : "Markedet er lukket · viser seneste lukkekurs"}` +
-      `<br>Kurser hentet ${esc(when)} · 1 USD = ${n2.format(state.fx)} kr`;
+    const when = at.toDateString() === nw.toDateString() ? "i dag kl. " + time : at.toLocaleDateString("da-DK", { day: "numeric", month: "short" }) + " kl. " + time;
+    $("stamp").innerHTML = `Kurser hentet ${esc(when)} · 1 USD = ${n2.format(state.fx)} kr<br>Træk ned for at opdatere`;
   }
+
+  /* ---------- del-kort ---------- */
+  async function openShare() {
+    if (!state) return;
+    const c = compute(), r = curRange(null), s = portfolioSeries(r);
+    const W = 1080, H = 1350, cv = document.createElement("canvas");
+    cv.width = W; cv.height = H;
+    const g = cv.getContext("2d");
+    const UP = "#30D158", DN = "#FF453A", MU = "#8E8E93", FG = "#FFFFFF";
+    const font = (w, px, rnd) => `${w} ${px}px ${rnd ? 'ui-rounded,"SF Pro Rounded",' : ""}-apple-system,"SF Pro Display",system-ui,sans-serif`;
+    const col = c.ret >= 0 ? UP : DN, X0 = 80;
+    g.fillStyle = "#0B0B0F"; g.fillRect(0, 0, W, H);
+    let rg = g.createRadialGradient(W * 0.88, 60, 0, W * 0.88, 60, 760);
+    rg.addColorStop(0, "rgba(125,122,255,.5)"); rg.addColorStop(1, "rgba(125,122,255,0)");
+    g.fillStyle = rg; g.fillRect(0, 0, W, H);
+    rg = g.createRadialGradient(60, H - 60, 0, 60, H - 60, 640);
+    rg.addColorStop(0, c.ret >= 0 ? "rgba(48,209,88,.22)" : "rgba(255,69,58,.22)"); rg.addColorStop(1, "rgba(0,0,0,0)");
+    g.fillStyle = rg; g.fillRect(0, 0, W, H);
+    const seq = (x, y, parts) => { for (const [txt, color, f] of parts) { g.font = f; g.fillStyle = color; g.fillText(txt, x, y); x += g.measureText(txt).width; } };
+
+    g.textBaseline = "alphabetic";
+    g.fillStyle = MU; g.font = font(600, 32); g.fillText("MINE AKTIER", X0, 128);
+    g.textAlign = "right"; g.fillText(new Date().toLocaleDateString("da-DK", { day: "numeric", month: "long", year: "numeric" }), W - X0, 128); g.textAlign = "left";
+    seq(X0 - 6, 290, [[kr(c.value), FG, font(700, 150, true)], [" kr", MU, font(600, 64, true)]]);
+    seq(X0, 370, [[`${skr(c.ret)}  ${pct(c.retPct)}`, col, font(700, 46, true)], ["  samlet afkast", MU, font(500, 36)]]);
+    seq(X0, 430, [[`${skr(c.dayKr)}  ${pct(c.dayPct)}`, c.dayKr >= 0 ? UP : DN, font(600, 36, true)], ["  i dag", MU, font(500, 32)]]);
+
+    // graf
+    const cx0 = X0, cx1 = W - X0, cy0 = 500, cy1 = 830;
+    g.fillStyle = "rgba(255,255,255,.05)"; g.beginPath(); g.roundRect ? g.roundRect(cx0 - 24, cy0 - 30, cx1 - cx0 + 48, cy1 - cy0 + 100, 36) : g.rect(cx0 - 24, cy0 - 30, cx1 - cx0 + 48, cy1 - cy0 + 100); g.fill();
+    if (s && s.v.length > 1) {
+      const ys = pctSeries(s, null), n = ys.length, p = ys[n - 1];
+      let lo = Math.min(0, ...ys), hi = Math.max(0, ...ys); if (hi - lo < 0.4) { hi += .2; lo -= .2; }
+      const X = i => cx0 + i / (n - 1) * (cx1 - cx0), Y = v => cy0 + 50 + (1 - (v - lo) / (hi - lo)) * (cy1 - cy0 - 50);
+      const pc = p >= 0 ? UP : DN;
+      g.fillStyle = MU; g.font = font(600, 30); g.fillText(`Udvikling ${r.txt}`, cx0, cy0 + 12);
+      g.textAlign = "right"; g.fillStyle = pc; g.font = font(700, 34, true); g.fillText(pct(p), cx1, cy0 + 12); g.textAlign = "left";
+      g.strokeStyle = "rgba(255,255,255,.18)"; g.lineWidth = 2; g.setLineDash([8, 10]);
+      g.beginPath(); g.moveTo(cx0, Y(0)); g.lineTo(cx1, Y(0)); g.stroke(); g.setLineDash([]);
+      g.beginPath(); ys.forEach((v, i) => i ? g.lineTo(X(i), Y(v)) : g.moveTo(X(i), Y(v)));
+      const lg = g.createLinearGradient(0, cy0, 0, cy1 + 40);
+      lg.addColorStop(0, pc + "55"); lg.addColorStop(1, pc + "00");
+      g.save(); g.lineTo(X(n - 1), cy1 + 40); g.lineTo(cx0, cy1 + 40); g.closePath(); g.fillStyle = lg; g.fill(); g.restore();
+      g.beginPath(); ys.forEach((v, i) => i ? g.lineTo(X(i), Y(v)) : g.moveTo(X(i), Y(v)));
+      g.strokeStyle = pc; g.lineWidth = 6; g.lineJoin = "round"; g.lineCap = "round"; g.stroke();
+      g.fillStyle = pc; g.beginPath(); g.arc(X(n - 1), Y(ys[n - 1]), 11, 0, Math.PI * 2); g.fill();
+    }
+
+    // aktierne
+    const rows = c.rows.slice(0, 4), rh = rows.length > 3 ? 84 : 98;
+    rows.forEach((row, i) => {
+      const y = 975 + i * rh;
+      g.fillStyle = FG; g.font = font(600, 40); g.fillText(row.a.navn, X0, y);
+      g.fillStyle = MU; g.font = font(500, 28); g.fillText(`${row.a.ticker} · afkast ${pct(row.retPct)}`, X0, y + 40);
+      g.textAlign = "right"; g.fillStyle = row.q.dp >= 0 ? UP : DN; g.font = font(700, 42, true); g.fillText(pct(row.q.dp), W - X0, y);
+      g.fillStyle = MU; g.font = font(500, 28); g.fillText("i dag", W - X0, y + 40); g.textAlign = "left";
+    });
+    g.fillStyle = MU; g.font = font(500, 26);
+    g.fillText(`Aktiesparekonto · kurser hentet kl. ${new Date(state.at).toLocaleTimeString("da-DK", { hour: "2-digit", minute: "2-digit" })}`, X0, H - 60);
+
+    $("shImg").src = cv.toDataURL("image/png");
+    $("sheet").hidden = false;
+    shareFile = null; $("shGo").hidden = true;
+    const blob = await new Promise(res => cv.toBlob(res, "image/png"));
+    if (blob && typeof File === "function") {
+      const f = new File([blob], "mine-aktier.png", { type: "image/png" });
+      try { if (navigator.canShare && navigator.canShare({ files: [f] })) { shareFile = f; $("shGo").hidden = false; } } catch {}
+    }
+  }
+  $("shGo").addEventListener("click", () => { if (shareFile) navigator.share({ files: [shareFile], title: "Mine aktier" }).catch(() => {}); });
+  $("shClose").addEventListener("click", () => { $("sheet").hidden = true; });
+  $("sheet").addEventListener("click", e => { if (e.target === $("sheet")) $("sheet").hidden = true; });
+
+  /* ---------- træk ned for at opdatere ---------- */
+  let py = null, pd = 0;
+  const PULL = 80;
+  function hidePtr() { const p = $("ptr"); p.classList.remove("spin", "drag"); p.style.opacity = ""; p.style.transform = ""; }
+  window.addEventListener("touchstart", e => {
+    py = null;
+    if (busy || window.scrollY > 2 || e.touches.length > 1 || !$("sheet").hidden || e.target.closest(".chart,.ins")) return;
+    py = e.touches[0].clientY; pd = 0;
+  }, { passive: true });
+  window.addEventListener("touchmove", e => {
+    if (py == null) return;
+    pd = Math.max(0, e.touches[0].clientY - py);
+    if (window.scrollY > 2 && pd < 10) { py = null; hidePtr(); return; }
+    const k = Math.min(pd / PULL, 1), p = $("ptr");
+    p.classList.add("drag");
+    p.style.opacity = k;
+    p.style.transform = `translateY(${Math.min(pd * 0.45, 44).toFixed(0)}px) scale(${(0.6 + 0.4 * k).toFixed(2)}) rotate(${(k * 300).toFixed(0)}deg)`;
+  }, { passive: true });
+  window.addEventListener("touchend", () => {
+    if (py == null) return;
+    py = null;
+    const p = $("ptr");
+    p.classList.remove("drag");
+    if (pd >= PULL && !busy) {
+      p.classList.add("spin"); p.style.opacity = 1; p.style.transform = "translateY(36px) scale(1)";
+      refresh(true);
+    } else hidePtr();
+  });
 
   /* ---------- knapper og navigation ---------- */
   $("refresh").addEventListener("click", () => refresh(true));
@@ -593,11 +1038,16 @@ a.stock:active{transform:scale(.985)}
   });
   $("main").addEventListener("click", e => {
     const b = e.target.closest("[data-range]");
-    if (b) { range = b.dataset.range; store.set(RANGESTORE, range); scrubbing = false; render(); return; }
+    if (b) { range = b.dataset.range; store.set(RANGESTORE, range); scrubbing = false; animNext = true; render(); return; }
+    const al = e.target.closest("[data-alloc]");
+    if (al) { const i = +al.dataset.alloc; allocSel = allocSel === i ? null : i; if (state) applyAlloc(compute()); return; }
+    if (e.target.closest("[data-share]")) { openShare(); return; }
     if (e.target.closest("a.stock")) homeScroll = window.scrollY;
   });
   window.addEventListener("hashchange", () => {
-    scrubbing = false; render();
+    scrubbing = false; animNext = true;
+    navAnim = view() ? "in-r" : "in-l";
+    render();
     window.scrollTo(0, view() ? 0 : homeScroll);
   });
   let rz; window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => { scrubbing = false; render(); }, 150); });
@@ -609,6 +1059,7 @@ a.stock:active{transform:scale(.985)}
   window.addEventListener("focus", () => refresh(false));
   window.addEventListener("online", () => refresh(false));
   setInterval(() => { if (document.visibilityState === "visible") refresh(false); }, AUTO_EVERY);
+  setInterval(() => { if (document.visibilityState === "visible") renderMkt(); }, 30 * 1000);
 
   render();
   refresh(true);

@@ -31,13 +31,30 @@ async function hentSerie(ticker, periode, interval) {
   throw fejl;
 }
 
+// udbytte de seneste 5 år (ex-dato og beløb pr. aktie i USD)
+async function hentUdbytte(ticker) {
+  let fejl;
+  for (const host of ["query1", "query2"]) {
+    try {
+      const r = await fetch(`https://${host}.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?range=5y&interval=1mo&events=div`, { headers: UA });
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      const res = (await r.json()).chart.result[0];
+      const ev = (res.events && res.events.dividends) || {};
+      return Object.values(ev).map(d => ({ t: d.date, v: Math.round(d.amount * 10000) / 10000 })).sort((a, b) => a.t - b.t);
+    } catch (e) { fejl = e; await new Promise(r => setTimeout(r, 1500)); }
+  }
+  throw fejl;
+}
+
 mkdirSync(out, { recursive: true });
 let ok = 0;
 for (const ticker of tickers) {
   try {
     const serier = {};
     for (const [navn, [periode, interval]] of Object.entries(SERIER)) serier[navn] = await hentSerie(ticker, periode, interval);
-    writeFileSync(`${out}/${ticker}.json`, JSON.stringify({ ticker, hentet: Math.floor(Date.now() / 1000), serier }));
+    let udbytte;
+    try { udbytte = await hentUdbytte(ticker); } catch (e) { console.log(ticker, "udbytte fejlede:", e.message); }
+    writeFileSync(`${out}/${ticker}.json`, JSON.stringify({ ticker, hentet: Math.floor(Date.now() / 1000), serier, ...(udbytte ? { udbytte } : {}) }));
     console.log(ticker, "ok", Object.entries(serier).map(([k, v]) => `${k}:${v.t.length}`).join(" "));
     ok++;
   } catch (e) {
