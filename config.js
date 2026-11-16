@@ -12,4 +12,4 @@ const AKTIER = [
 // Din gratis Finnhub-nøgle (https://finnhub.io → "Get free API key").
 // Indsæt den mellem anførselstegnene. Står den tom, spørger appen
 // efter nøglen og gemmer den kun på den telefon, du taster den ind på.
-const FINNHUB_KEY = "";
+const FINNHUB_KEY = "dbtlm5pr01qtr41fh2ggdbtlm5pr01qtr41fh2h0";
