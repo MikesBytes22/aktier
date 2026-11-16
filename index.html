@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mine aktier</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Aktier">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#F2F2F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+:root{
+  color-scheme:light dark;
+  --bg:#F2F2F7; --surface:#FFFFFF; --surface-2:#EFEFF4; --line:#E3E3E8;
+  --fg:#000000; --fg-2:#3C3C43CC; --muted:#6E6E73;
+  --accent:#5856D6; --accent-ink:#FFFFFF;
+  --up:#1E8E3E; --up-soft:#E3F5E8; --down:#D92D20; --down-soft:#FDE7E5;
+  --display:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,system-ui,sans-serif;
+  --round:ui-rounded,"SF Pro Rounded",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  --r:18px;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#000000; --surface:#1C1C1E; --surface-2:#2C2C2E; --line:#38383A;
+  --fg:#FFFFFF; --fg-2:#EBEBF5B3; --muted:#8E8E93;
+  --accent:#7D7AFF; --accent-ink:#FFFFFF;
+  --up:#30D158; --up-soft:#0F2E18; --down:#FF453A; --down-soft:#3A1512;
+}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--fg)}
+body{font:16px/1.45 var(--display);min-height:100vh;min-height:100dvh}
+.app{max-width:560px;margin:0 auto;
+  padding:calc(env(safe-area-inset-top,0px) + 14px) max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 24px) max(16px,env(safe-area-inset-left,0px))}
+.num{font-family:var(--round);font-variant-numeric:tabular-nums}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+h1{font-size:30px;font-weight:700;margin:0;line-height:1.1}
+.btn{border:0;border-radius:99px;padding:10px 16px;font:600 15px var(--display);background:var(--accent);color:var(--accent-ink);
+  display:inline-flex;align-items:center;gap:7px;cursor:pointer;touch-action:manipulation;transition:transform .12s ease,opacity .15s ease}
+.btn:active{transform:scale(.95)}
+.btn:disabled{opacity:.6}
+.btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.btn.busy svg{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.btn:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.stack{display:flex;flex-direction:column;gap:12px}
+.lbl{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+
+/* hero */
+.hero .big{font-size:46px;font-weight:700;line-height:1.05;margin-top:2px;white-space:nowrap}
+.hero .big small{font-size:22px;font-weight:600;color:var(--fg-2);margin-left:4px}
+.hero .two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.box{background:var(--surface-2);border-radius:12px;padding:10px 12px;min-width:0}
+.box .v{font-size:19px;font-weight:700;line-height:1.2;margin-top:2px;white-space:nowrap}
+.box .s{font-size:13.5px;font-weight:600}
+
+/* aktiekort */
+.stock .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.stock .name{font-size:17px;font-weight:600;line-height:1.2}
+.stock .tick{font-size:12.5px;color:var(--muted);font-weight:600;letter-spacing:.04em;margin-top:2px}
+.stock .price{text-align:right;font-size:17px;font-weight:600;white-space:nowrap}
+.stock .price span{display:block;font-size:12.5px;color:var(--muted);font-weight:500}
+.today{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:12px 0 2px}
+.today .pct{font-size:42px;font-weight:700;line-height:1}
+.today .usd{font-size:17px;font-weight:600}
+.today .tag{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;margin-left:auto}
+.meter{height:6px;border-radius:4px;background:var(--surface-2);overflow:hidden;margin:10px 0 12px;position:relative}
+.meter i{position:absolute;top:0;bottom:0;border-radius:4px}
+.kv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;border-top:1px solid var(--line);padding-top:12px}
+.kv .k{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.kv .v{font-size:15.5px;font-weight:600;white-space:nowrap}
+.kv .s{font-size:12.5px;font-weight:600}
+.up{color:var(--up)} .down{color:var(--down)} .flat{color:var(--fg-2)}
+.bg-up{background:var(--up)} .bg-down{background:var(--down)}
+
+.stamp{font-size:13px;color:var(--muted);text-align:center;margin-top:14px;line-height:1.5}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:var(--muted);vertical-align:baseline}
+.dot.live{background:var(--up)}
+.err{font-size:14px;color:var(--down);background:var(--down-soft);border-radius:12px;padding:10px 12px;margin-bottom:12px}
+.setup p{margin:4px 0 10px;font-size:14.5px;color:var(--fg-2)}
+.setup form{display:flex;gap:8px}
+.setup input{flex:1;min-width:0;border:1px solid var(--line);background:var(--surface-2);color:var(--fg);border-radius:12px;padding:10px 12px;font:16px var(--display)}
+.setup a{color:var(--accent);font-weight:600}
+.skel{height:150px;border-radius:var(--r);background:var(--surface);border:1px solid var(--line);opacity:.6}
+.fresh{animation:pop .35s ease}
+@keyframes pop{from{opacity:.4;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.fresh,.btn.busy svg{animation:none}}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>Mine aktier</h1>
+    <button class="btn" id="refresh" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 6.3"/><path d="M20 4v7h-7"/></svg>
+      <span id="refreshTxt">Opdater</span>
+    </button>
+  </header>
+
+  <div class="err" id="err" hidden></div>
+
+  <section class="card setup" id="setup" hidden>
+    <div class="lbl">Mangler API-nøgle</div>
+    <p>Opret en gratis nøgle på <a href="https://finnhub.io/register" target="_blank" rel="noopener">finnhub.io</a> og indsæt den her. Den gemmes kun på denne enhed.</p>
+    <form id="keyForm">
+      <input id="keyInput" type="text" inputmode="latin" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Finnhub API-nøgle" aria-label="Finnhub API-nøgle">
+      <button class="btn" type="submit">Gem</button>
+    </form>
+  </section>
+
+  <main class="stack" id="main"></main>
+  <div class="stamp" id="stamp"></div>
+</div>
+
+<script src="config.js"></script>
+<script>
+(() => {
+  "use strict";
+  const CACHE = "aktier.cache.v1", KEYSTORE = "aktier.finnhubKey";
+  const MIN_GAP = 10 * 1000;        // mindst 10 sek. mellem automatiske hentninger
+  const AUTO_EVERY = 60 * 1000;     // hent selv hvert minut, mens appen er fremme
+  const $ = id => document.getElementById(id);
+  const store = {
+    get(k){ try { return localStorage.getItem(k); } catch { return null; } },
+    set(k, v){ try { localStorage.setItem(k, v); } catch {} },
+  };
+
+  let state = null;                 // { quotes:{T:{c,d,dp,pc,t}}, fx, at }
+  let busy = false, lastTry = 0;
+  try { state = JSON.parse(store.get(CACHE)); } catch {}
+
+  const key = () => (typeof FINNHUB_KEY === "string" && FINNHUB_KEY.trim()) || (store.get(KEYSTORE) || "").trim();
+
+  /* ---------- formatering ---------- */
+  const nf = (d) => new Intl.NumberFormat("da-DK", { minimumFractionDigits: d, maximumFractionDigits: d });
+  const n0 = nf(0), n2 = nf(2);
+  const sign = v => v > 0 ? "+" : v < 0 ? "−" : "";
+  const kr  = v => n0.format(Math.round(v));
+  const skr = v => sign(Math.round(v)) + n0.format(Math.abs(Math.round(v))) + " kr";
+  const pct = v => sign(v) + n2.format(Math.abs(v)) + " %";
+  const usd = v => n2.format(v) + " USD";
+  const susd = v => sign(v) + n2.format(Math.abs(v)) + " USD";
+  const cls = v => v > 0.0001 ? "up" : v < -0.0001 ? "down" : "flat";
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
+
+  /* ---------- hent data ---------- */
+  async function getJSON(url) {
+    const r = await fetch(url, { cache: "no-store" });
+    if (!r.ok) { const e = new Error("HTTP " + r.status); e.status = r.status; throw e; }
+    return r.json();
+  }
+  async function getQuote(ticker, k) {
+    const q = await getJSON(`https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(ticker)}&token=${encodeURIComponent(k)}`);
+    if (!q || !q.c) throw new Error(`Ingen kurs for ${ticker}. Tjek tickeren i config.js.`);
+    return { c: q.c, d: q.d || 0, dp: q.dp || 0, pc: q.pc || q.c, t: q.t || 0 };
+  }
+  async function getFx() {
+    try {
+      const j = await getJSON("https://api.frankfurter.dev/v1/latest?base=USD&symbols=DKK");
+      if (j && j.rates && j.rates.DKK) return j.rates.DKK;
+    } catch {}
+    const j = await getJSON("https://open.er-api.com/v6/latest/USD");
+    if (j && j.rates && j.rates.DKK) return j.rates.DKK;
+    throw new Error("Kunne ikke hente valutakursen USD/DKK.");
+  }
+
+  async function refresh(manual) {
+    if (busy) return;
+    const k = key();
+    $("setup").hidden = !!k;
+    if (!k) { render(); return; }
+    if (!manual && Date.now() - lastTry < MIN_GAP) return;
+    busy = true; lastTry = Date.now();
+    setBusy(true);
+    try {
+      const [fx, ...qs] = await Promise.all([getFx(), ...AKTIER.map(a => getQuote(a.ticker, k))]);
+      const quotes = {};
+      AKTIER.forEach((a, i) => quotes[a.ticker] = qs[i]);
+      state = { quotes, fx, at: Date.now() };
+      store.set(CACHE, JSON.stringify(state));
+      showErr("");
+      render(true);
+    } catch (e) {
+      let msg = e.message;
+      if (e.status === 401 || e.status === 403) msg = "Finnhub afviste API-nøglen. Tjek at den er indsat rigtigt.";
+      else if (e.status === 429) msg = "For mange kald til Finnhub lige nu. Prøv igen om et minut.";
+      else if (e instanceof TypeError) msg = "Ingen forbindelse. Viser de senest hentede kurser.";
+      showErr(msg);
+      if (e.status === 401 || e.status === 403) { if (!(FINNHUB_KEY || "").trim()) $("setup").hidden = false; }
+      render();
+    } finally {
+      busy = false; setBusy(false);
+    }
+  }
+
+  function setBusy(b) {
+    const btn = $("refresh");
+    btn.disabled = b; btn.classList.toggle("busy", b);
+    $("refreshTxt").textContent = b ? "Henter…" : "Opdater";
+  }
+  function showErr(m) { $("err").textContent = m; $("err").hidden = !m; }
+
+  /* ---------- tegn siden ---------- */
+  function render(fresh) {
+    const main = $("main");
+    const have = state && state.fx && AKTIER.every(a => state.quotes && state.quotes[a.ticker]);
+    if (!have) {
+      main.innerHTML = key() ? '<div class="skel"></div><div class="skel"></div>' : "";
+      $("stamp").textContent = "";
+      return;
+    }
+    const fx = state.fx;
+    let value = 0, cost = 0, dayUsd = 0, prevUsd = 0;
+    const rows = AKTIER.map(a => {
+      const q = state.quotes[a.ticker];
+      const val = a.antal * q.c * fx;
+      const ret = a.antal * (q.c - a.gak) * fx;
+      value += val; cost += a.antal * a.gak * fx;
+      dayUsd += a.antal * q.d; prevUsd += a.antal * q.pc;
+      return { a, q, val, ret, retPct: (q.c / a.gak - 1) * 100 };
+    });
+    const ret = value - cost, retPct = cost ? ret / cost * 100 : 0;
+    const dayKr = dayUsd * fx, dayPct = prevUsd ? dayUsd / prevUsd * 100 : 0;
+
+    const hero = `
+      <section class="card hero">
+        <div class="lbl">Samlet værdi</div>
+        <div class="big num">${kr(value)}<small>kr</small></div>
+        <div class="two">
+          <div class="box"><div class="lbl">Samlet afkast</div>
+            <div class="v num ${cls(ret)}">${skr(ret)}</div>
+            <div class="s num ${cls(ret)}">${pct(retPct)}</div></div>
+          <div class="box"><div class="lbl">I dag</div>
+            <div class="v num ${cls(dayKr)}">${skr(dayKr)}</div>
+            <div class="s num ${cls(dayKr)}">${pct(dayPct)}</div></div>
+        </div>
+      </section>`;
+
+    const cards = rows.map(({ a, q, val, ret, retPct }) => {
+      const c = cls(q.dp);
+      // lille måler: 0 i midten, fuldt udslag ved ±5 % på dagen
+      const w = Math.min(Math.abs(q.dp) / 5, 1) * 50;
+      const bar = c === "flat" ? "" : `<i class="bg-${c}" style="${q.dp >= 0 ? "left:50%" : "right:50%"};width:${w.toFixed(1)}%"></i>`;
+      return `
+      <section class="card stock">
+        <div class="top">
+          <div style="min-width:0"><div class="name">${esc(a.navn)}</div><div class="tick">${esc(a.ticker)} · ${n0.format(a.antal)} stk</div></div>
+          <div class="price num">${usd(q.c)}<span>kurs nu</span></div>
+        </div>
+        <div class="today">
+          <div class="pct num ${c}">${pct(q.dp)}</div>
+          <div class="usd num ${c}">${susd(q.d)}</div>
+          <div class="tag">I dag</div>
+        </div>
+        <div class="meter">${bar}</div>
+        <div class="kv">
+          <div><div class="k">Værdi</div><div class="v num">${kr(val)} kr</div></div>
+          <div><div class="k">Afkast</div><div class="v num ${cls(ret)}">${skr(ret)}</div><div class="s num ${cls(ret)}">${pct(retPct)}</div></div>
+          <div><div class="k">GAK</div><div class="v num">${n2.format(a.gak)}</div><div class="s flat">USD</div></div>
+        </div>
+      </section>`;
+    }).join("");
+
+    main.innerHTML = hero + cards;
+    if (fresh) { main.classList.remove("fresh"); void main.offsetWidth; main.classList.add("fresh"); }
+    renderStamp();
+  }
+
+  function renderStamp() {
+    if (!state || !state.at) return;
+    const at = new Date(state.at), now = new Date();
+    const time = at.toLocaleTimeString("da-DK", { hour: "2-digit", minute: "2-digit" });
+    const sameDay = at.toDateString() === now.toDateString();
+    const when = sameDay ? "i dag kl. " + time : at.toLocaleDateString("da-DK", { day: "numeric", month: "short" }) + " kl. " + time;
+    const newest = Math.max(...AKTIER.map(a => (state.quotes[a.ticker] || {}).t || 0)) * 1000;
+    const open = state.at - newest < 20 * 60 * 1000;
+    $("stamp").innerHTML =
+      `<span class="dot ${open ? "live" : ""}"></span>${open ? "Markedet er åbent" : "Markedet er lukket · viser seneste lukkekurs"}` +
+      `<br>Kurser hentet ${esc(when)} · 1 USD = ${n2.format(state.fx)} kr`;
+  }
+
+  /* ---------- hvornår hentes der? ---------- */
+  $("refresh").addEventListener("click", () => refresh(true));
+  $("keyForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const v = $("keyInput").value.trim();
+    if (!v) return;
+    store.set(KEYSTORE, v);
+    refresh(true);
+  });
+  // iPhone holder en hjemmeskærms-app i hukommelsen. Derfor hentes der også,
+  // hver gang appen kommer frem igen – ikke kun når siden indlæses første gang.
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") refresh(false); });
+  window.addEventListener("pageshow", () => refresh(false));
+  window.addEventListener("focus", () => refresh(false));
+  window.addEventListener("online", () => refresh(false));
+  setInterval(() => { if (document.visibilityState === "visible") refresh(false); }, AUTO_EVERY);
+
+  render();
+  refresh(true);
+})();
+</script>
+</body>
+</html>
