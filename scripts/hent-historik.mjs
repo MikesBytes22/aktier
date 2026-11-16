@@ -8,7 +8,8 @@ const gammel = process.argv[3] || "";            // adresse til de senest gemte 
 const cfg = readFileSync(new URL("../config.js", import.meta.url), "utf8");
 // alle tickers i AKTIER og HANDLER (også solgte aktier), uden kommentarlinjer
 const blok = cfg.split("\n").filter(l => !l.trim().startsWith("//")).join("\n");
-const tickers = [...new Set([...blok.matchAll(/ticker:\s*"([A-Za-z0-9.\-]+)"/g)].map(m => m[1]))];
+// SPY (S&P 500) hentes altid med, så appen kan sammenligne med markedet
+const tickers = [...new Set([...[...blok.matchAll(/ticker:\s*"([A-Za-z0-9.\-]+)"/g)].map(m => m[1]), "SPY"])];
 
 // navn i filen: [periode, opløsning]
 const SERIER = { d1: ["1d", "5m"], d5: ["5d", "15m"], m1: ["1mo", "60m"], y5: ["5y", "1d"], max: ["max", "1wk"] };

@@ -212,6 +212,42 @@ a.stock:active{transform:scale(.985)}
   .btn.busy svg,.ptr.spin svg,.dot.live::after,.skel,.in-r,.in-l,.fadein,.sheet{animation:none}
   .draw{animation:none;stroke-dashoffset:0}
 }
+/* sammenlign med S&P 500 */
+.cmp{border:0;border-radius:99px;padding:4px 10px 4px 8px;background:var(--surface-2);color:var(--fg-2);font:600 12.5px var(--display);display:inline-flex;align-items:center;gap:6px;cursor:pointer;touch-action:manipulation}
+.cmp .ln{width:16px;border-top:2px solid var(--muted);display:inline-block}
+.cmp.on{background:var(--fg);color:var(--bg)}
+.cmp.on .ln{border-color:var(--bg)}
+.legend .vs{display:block;flex-basis:100%;font-size:13px;color:var(--fg-2)}
+.vs b{font-weight:650}
+
+/* dagskalender */
+.heatw{display:flex;gap:6px;margin-top:12px}
+.heatd{display:grid;grid-template-rows:14px repeat(5,15px);gap:4px;font:600 10px/15px var(--display);color:var(--muted)}
+.heat{display:grid;grid-template-rows:14px repeat(5,15px);grid-auto-flow:column;grid-auto-columns:15px;gap:4px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0;padding-bottom:2px}
+.heat::-webkit-scrollbar{display:none}
+.heat .m{font:600 10px/14px var(--display);color:var(--muted);white-space:nowrap;overflow:visible}
+.heat .c{width:15px;height:15px;border-radius:4px;background:var(--surface-2);border:0;padding:0;cursor:pointer;position:relative}
+.heat .c.x{opacity:.45;cursor:default}
+.heat .c i{position:absolute;inset:0;border-radius:4px}
+.heat .c.sel{box-shadow:0 0 0 2px var(--fg)}
+.heat .c.now{box-shadow:inset 0 0 0 1.5px var(--accent)}
+.heatinfo{font-size:14px;color:var(--fg-2);margin-top:10px;min-height:20px}
+.heatinfo b{font-weight:650;color:var(--fg)}
+.heatkey{display:flex;align-items:center;gap:3px;font-size:11px;color:var(--muted);margin-top:8px;justify-content:flex-end}
+.heatkey i{width:11px;height:11px;border-radius:3px;display:inline-block}
+
+/* vend telefonen: grafen i fuld skærm */
+@media (orientation:landscape) and (max-height:520px){
+  header,.mkt,.stamp,.err,.setup,main>:not(.chartcard){display:none!important}
+  .app{max-width:none;padding:max(10px,env(safe-area-inset-top,0px)) max(20px,env(safe-area-inset-right,0px)) max(8px,env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px))}
+  .chartcard{border:0;background:none;padding:0}
+  .chartcard .hrow,.chartcard .two,.chartcard .tick,.chartcard .lbl{display:none}
+  .chartcard .name{display:inline-block;font-size:15px;color:var(--muted);margin-right:12px}
+  .chartcard .big{display:inline-block;font-size:28px;margin:0!important}
+  .chartcard .chg{display:inline-block;margin-left:12px}
+  .chartcard .chart{height:calc(100vh - 165px);height:calc(100dvh - 165px);margin-top:6px}
+  .chartcard .legend{margin-top:6px}
+}
 [hidden]{display:none!important}
 </style>
 </head>
@@ -283,7 +319,9 @@ a.stock:active{transform:scale(.985)}
   let state = null;                 // { quotes:{T:{c,d,dp,pc,t}}, fx, at }
   let hist = {}, histAt = 0, histDone = false;
   let busy = false, lastTry = 0, scrubbing = false, homeScroll = 0;
-  let animNext = true, navAnim = "", allocSel = null, shareFile = null;
+  let animNext = true, navAnim = "", allocSel = null, shareFile = null, heatSel = null;
+  let compare = store.get("aktier.compare") === "1";
+  const BENCH = "SPY";
   let range = store.get(RANGESTORE) || "1D";
   try { state = JSON.parse(store.get(CACHE)); } catch {}
 
@@ -373,8 +411,8 @@ a.stock:active{transform:scale(.985)}
   async function loadHist(force) {
     if (!force && Date.now() - histAt < HIST_EVERY) return;
     histAt = Date.now();
-    await Promise.all(ALLE.map(async a => {
-      try { const j = await getJSON(`${HIST_URL}${encodeURIComponent(a.ticker)}.json?t=${histAt}`); if (j && j.serier) hist[a.ticker] = j; } catch {}
+    await Promise.all(ALLE.map(a => a.ticker).concat(BENCH).map(async t => {
+      try { const j = await getJSON(`${HIST_URL}${encodeURIComponent(t)}.json?t=${histAt}`); if (j && j.serier) hist[t] = j; } catch {}
     }));
     histDone = true;
     render();
@@ -390,9 +428,10 @@ a.stock:active{transform:scale(.985)}
     setBusy(true);
     loadHist(manual);
     try {
-      const [fx, ...qs] = await Promise.all([getFx(), ...AKTIER.map(a => getQuote(a.ticker, k))]);
+      const [fx, bq, ...qs] = await Promise.all([getFx(), getQuote(BENCH, k).catch(() => null), ...AKTIER.map(a => getQuote(a.ticker, k))]);
       const quotes = {};
       AKTIER.forEach((a, i) => quotes[a.ticker] = qs[i]);
+      if (bq) quotes[BENCH] = bq;
       state = { quotes, fx, at: Date.now() };
       store.set(CACHE, JSON.stringify(state));
       showErr("");
@@ -720,7 +759,7 @@ a.stock:active{transform:scale(.985)}
       </a>`;
     }).join("");
     return `
-      <section class="card hero">
+      <section class="card hero chartcard">
         <div class="hrow"><div class="lbl">Samlet værdi</div>
           <button class="ibtn" type="button" data-share aria-label="Del din udvikling">${svgI("chart").replace('aria-hidden="true"', 'aria-hidden="true"')}</button></div>
         <div class="big num" id="roVal"></div>
@@ -738,6 +777,7 @@ a.stock:active{transform:scale(.985)}
       ${insightsHTML(c)}
       ${cards}
       ${allocHTML(c)}
+      ${heatHTML()}
       ${recordsHTML(c)}
       ${TX.length ? `<section class="card"><div class="lbl">Køb og salg</div>${txList(TX.slice().reverse(), true)}</section>` : ""}`;
   }
@@ -749,7 +789,7 @@ a.stock:active{transform:scale(.985)}
       ? txList(tx, false)
       : `<p class="hint">Ingen handler lagt ind endnu. Når købsdatoen er lagt ind, vises købet som en cirkel på grafen.</p>`;
     return `
-      <section class="card">
+      <section class="card chartcard">
         <div class="name">${esc(a.navn)}</div>
         <div class="tick">${esc(t)} · ${n0.format(a.antal)} stk</div>
         <div class="big num" id="roVal" style="margin-top:10px"></div>
@@ -773,6 +813,81 @@ a.stock:active{transform:scale(.985)}
       </section>`;
   }
 
+  // S&P 500 i samme periode: omregnet til % fra periodens start og placeret efter tid på grafens akse
+  function benchFor(s, r, n) {
+    const bs = stockSeries(BENCH, r);
+    if (!bs || bs.t.length < 2) return { pts: [] };
+    const t0 = s.t[0], tN = s.t[n - 1];
+    let j = bs.t.findIndex(x => x >= t0); if (j < 0) return { pts: [] };
+    const base = r.id === "1D" ? bs.base : (bs.t[j] > t0 && j > 0 ? bs.v[j - 1] : bs.v[j]);
+    const pos = tm => {
+      if (tm <= t0) return 0;
+      if (tm >= tN) return tm - tN <= r.bar * 1.5 ? n - 1 : null;
+      let lo = 0, hi = n - 1;
+      while (hi - lo > 1) { const m = (lo + hi) >> 1; if (s.t[m] <= tm) lo = m; else hi = m; }
+      return lo + (tm - s.t[lo]) / ((s.t[hi] - s.t[lo]) || 1);
+    };
+    const pts = [];
+    if (r.id !== "1D") pts.push([0, (bs.v[j > 0 && bs.t[j] > t0 ? j - 1 : j] / base - 1) * 100]);
+    for (let k = j; k < bs.t.length; k++) { const x = pos(bs.t[k]); if (x != null) pts.push([x, (bs.v[k] / base - 1) * 100]); }
+    return { pts };
+  }
+
+  // dagskalender: én firkant pr. handelsdag, grøn/rød efter dagens resultat (køb og salg trukket fra)
+  let heatDays = null;
+  function heatHTML() {
+    const s = portfolioSeries(Y5);
+    if (!s || s.v.length < 2) return "";
+    const days = {};
+    for (let i = 1; i < s.v.length; i++) {
+      let net = 0, ind = 0;
+      for (const x of TX) if (x.t > s.t[i - 1] && x.t <= s.t[i]) { const b = x.antal * x.kurs * state.fx; if (x.salg) net -= b; else { net += b; ind += b; } }
+      const d = s.v[i] - s.v[i - 1] - net, grund = s.v[i - 1] + ind;
+      days[new Date(s.t[i] * 1000).toISOString().slice(0, 10)] = { d, p: grund ? d / grund * 100 : 0, t: s.t[i] };
+    }
+    heatDays = days;
+    const DAY = 86400000, today = new Date(); today.setUTCHours(0, 0, 0, 0);
+    const monday = dt => { const x = new Date(dt); x.setUTCDate(x.getUTCDate() - ((x.getUTCDay() + 6) % 7)); return x; };
+    const end = monday(today), first = monday(new Date(s.t[0] * 1000));
+    let start = new Date(Math.min(first, end - 11 * 7 * DAY));
+    if ((end - start) / DAY / 7 > 52) start = new Date(end - 52 * 7 * DAY);
+    const todayKey = today.toISOString().slice(0, 10);
+    let cells = "", lastM = -1, sinceLbl = 9;
+    for (let w = start; w <= end; w = new Date(+w + 7 * DAY)) {
+      const m = w.getUTCMonth();
+      const lbl = m !== lastM && sinceLbl >= 3;
+      cells += `<span class="m">${lbl ? esc(w.toLocaleDateString("da-DK", { month: "short", timeZone: "UTC" }).replace(".", "")) : ""}</span>`;
+      if (lbl) { lastM = m; sinceLbl = 0; } else { sinceLbl++; if (m !== lastM && w.getUTCDate() > 7) lastM = m; }
+      for (let k = 0; k < 5; k++) {
+        const dt = new Date(+w + k * DAY), key = dt.toISOString().slice(0, 10), x = days[key];
+        const cl = key === todayKey ? " now" : "";
+        if (!x) { cells += `<span class="c x${cl}"></span>`; continue; }
+        const a = Math.abs(x.p), op = a < 0.5 ? .35 : a < 1.5 ? .55 : a < 3 ? .8 : 1;
+        cells += `<button type="button" class="c${cl}" data-day="${key}" aria-label="${esc(dato(x.t))}: ${esc(skr(x.d))}"><i style="background:var(--${x.d >= 0 ? "up" : "down"});opacity:${op}"></i></button>`;
+      }
+    }
+    return `<section class="card"><div class="lbl">Dage</div>
+      <div class="heatw"><div class="heatd"><span></span><span>M</span><span>T</span><span>O</span><span>T</span><span>F</span></div>
+      <div class="heat" id="heat">${cells}</div></div>
+      <div class="heatinfo" id="heatInfo"></div>
+      <div class="heatkey">Fald <i style="background:var(--down)"></i><i style="background:var(--down);opacity:.55"></i><i style="background:var(--surface-2)"></i><i style="background:var(--up);opacity:.55"></i><i style="background:var(--up)"></i> Stigning</div>
+    </section>`;
+  }
+  function applyHeat(scroll) {
+    const box = $("heat"), info = $("heatInfo"); if (!box || !heatDays) return;
+    if (scroll) box.scrollLeft = box.scrollWidth;
+    box.querySelectorAll("[data-day]").forEach(el => el.classList.toggle("sel", el.dataset.day === heatSel));
+    const x = heatSel && heatDays[heatSel];
+    if (x) {
+      const d = new Date(x.t * 1000).toLocaleDateString("da-DK", { weekday: "long", day: "numeric", month: "long" });
+      info.innerHTML = `${esc(d.charAt(0).toUpperCase() + d.slice(1))}: <b class="${cls(x.d)}">${skr(x.d)} (${pct(x.p)})</b>`;
+      return;
+    }
+    const all = Object.values(heatDays), g = all.filter(v => v.d > 0).length, r = all.filter(v => v.d < 0).length;
+    let st = 0, best = 0; for (const v of all) { st = v.d > 0 ? st + 1 : 0; best = Math.max(best, st); }
+    info.innerHTML = `<b class="up">${g} grønne</b> og <b class="down">${r} røde</b> dage${best >= 2 ? ` · længste stime: <b>${best} grønne i træk</b>` : ""}. Tryk på en dag for detaljer.`;
+  }
+
   function render() {
     if (scrubbing) return;
     renderMkt();
@@ -789,7 +904,7 @@ a.stock:active{transform:scale(.985)}
     main.innerHTML = a ? stockHTML(c, a) : homeHTML(c);
     runRolls(main);
     drawChart(c, a);
-    if (!a) applyAlloc(c);
+    if (!a) { applyAlloc(c); applyHeat(true); }
     if (navAnim) { main.classList.remove("in-r", "in-l"); void main.offsetWidth; main.classList.add(navAnim); navAnim = ""; }
     renderStamp();
   }
@@ -832,10 +947,13 @@ a.stock:active{transform:scale(.985)}
     const n = s.v.length, last = s.v[n - 1], ys = pctSeries(s, a);
     readout(last, n - 1, r.txt);
 
-    const W = Math.max(box.clientWidth, 200), H = 200, pt = 12, pb = 6;
+    const W = Math.max(box.clientWidth, 200), H = Math.max(box.clientHeight || 200, 120), pt = 12, pb = 6;
     const marks = marksFor(a, s, r).map(m => ({ ...m, y: a ? (m.kurs / s.base - 1) * 100 : ys[m.i] }));
     let lo = Math.min(0, ...ys), hi = Math.max(0, ...ys);
     for (const m of marks) { lo = Math.min(lo, m.y); hi = Math.max(hi, m.y); }
+    // S&P 500 over samme periode, lagt på samme tidsakse
+    const bench = compare ? benchFor(s, r, n) : null;
+    if (bench) for (const [, v] of bench.pts) { lo = Math.min(lo, v); hi = Math.max(hi, v); }
     // GAK-linjen vises kun, når den ligger nogenlunde i nærheden – ellers trykker den kurven flad
     let gak = null;
     if (a) { const g = (a.gak / s.base - 1) * 100, sp = (hi - lo) || 1; if (g > lo - sp && g < hi + sp) { gak = g; lo = Math.min(lo, g); hi = Math.max(hi, g); } }
@@ -868,6 +986,7 @@ a.stock:active{transform:scale(.985)}
         ${grid}
         <path d="${area}" fill="url(#gr)" class="${anim ? "fadein" : ""}"/>
         ${gak != null ? `<line x1="${GL}" x2="${W}" y1="${Y(gak).toFixed(1)}" y2="${Y(gak).toFixed(1)}" style="stroke:var(--accent)" stroke-width="1.5" stroke-dasharray="5 4" opacity=".85"/>` : ""}
+        ${bench && bench.pts.length > 1 ? `<path d="${bench.pts.map(([x, v], k) => (k ? "L" : "M") + X(x).toFixed(1) + "," + Y(v).toFixed(1)).join("")}" fill="none" style="stroke:var(--muted)" stroke-width="1.6" stroke-linejoin="round" opacity=".9" class="${anim ? "fadein" : ""}"/>` : ""}
         <path d="${line}" fill="none" style="stroke:${col}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" ${anim ? 'pathLength="1" class="draw"' : ""}/>
         <g class="${anim ? "fadein" : ""}">${mk}<circle cx="${X(n - 1).toFixed(1)}" cy="${Y(ys[n - 1]).toFixed(1)}" r="4" style="fill:${col}"/></g>
         <g id="scrub" visibility="hidden">
@@ -893,6 +1012,12 @@ a.stock:active{transform:scale(.985)}
     if (marks.some(m => m.salg)) lg.push('<span><i class="s">S</i>Salg</span>');
     if (gak != null) lg.push('<span><i class="dash g"></i>Din GAK</span>');
     if (r.id === "1D") lg.push('<span><i class="dash"></i>0% = lukkekurs i går</span>');
+    const bl = bench && bench.pts.length ? bench.pts[bench.pts.length - 1][1] : null;
+    lg.unshift(`<button type="button" class="cmp${compare ? " on" : ""}" data-cmp aria-pressed="${compare}"><i class="ln"></i>S&amp;P 500${compare ? (bl != null ? " " + pctS(bl) : " · ingen data endnu") : ""}</button>`);
+    if (bl != null) {
+      const diff = ys[n - 1] - bl;
+      lg.push(`<span class="vs">${a ? esc(a.navn) : "Du"} ${diff >= 0 ? "slår" : "er bagud for"} S&amp;P 500 med <b class="${diff >= 0 ? "up" : "down"}">${n1.format(Math.abs(diff))} procentpoint</b> ${esc(r.txt)}</span>`);
+    }
     $("legend").innerHTML = lg.join("");
 
     // træk fingeren hen over grafen for at aflæse et punkt
@@ -923,7 +1048,7 @@ a.stock:active{transform:scale(.985)}
     const at = new Date(state.at), nw = new Date();
     const time = at.toLocaleTimeString("da-DK", { hour: "2-digit", minute: "2-digit" });
     const when = at.toDateString() === nw.toDateString() ? "i dag kl. " + time : at.toLocaleDateString("da-DK", { day: "numeric", month: "short" }) + " kl. " + time;
-    $("stamp").innerHTML = `Kurser hentet ${esc(when)} · 1 USD = ${n2.format(state.fx)} kr<br>Træk ned for at opdatere`;
+    $("stamp").innerHTML = `Kurser hentet ${esc(when)} · 1 USD = ${n2.format(state.fx)} kr<br>Træk ned for at opdatere · vend telefonen for stor graf`;
   }
 
   /* ---------- del-kort ---------- */
@@ -1039,6 +1164,9 @@ a.stock:active{transform:scale(.985)}
   $("main").addEventListener("click", e => {
     const b = e.target.closest("[data-range]");
     if (b) { range = b.dataset.range; store.set(RANGESTORE, range); scrubbing = false; animNext = true; render(); return; }
+    if (e.target.closest("[data-cmp]")) { compare = !compare; store.set("aktier.compare", compare ? "1" : "0"); animNext = true; render(); return; }
+    const hc = e.target.closest("[data-day]");
+    if (hc) { heatSel = heatSel === hc.dataset.day ? null : hc.dataset.day; applyHeat(); return; }
     const al = e.target.closest("[data-alloc]");
     if (al) { const i = +al.dataset.alloc; allocSel = allocSel === i ? null : i; if (state) applyAlloc(compute()); return; }
     if (e.target.closest("[data-share]")) { openShare(); return; }
